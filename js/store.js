@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231322';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231328';
 
 export const state = {
   ready: false,
@@ -40,12 +40,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231322');
+    const { create } = await import('./adapters/supabase.js?v=202611231328');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231322');
+    const { create } = await import('./adapters/local.js?v=202611231328');
     adapter = create();
   }
   await reload();

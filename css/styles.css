@@ -690,3 +690,5 @@ button.link { padding: 0; border: 0; background: none; font: inherit; font-weigh
 .panel.tone-peach { background: var(--peach); }
 .tone-panel .row-sub { color: var(--on-tone-2); }
 .row-sub.wrap { white-space: normal; }
+.bubble.brand { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 0 0 1px var(--line); }
+.bubble.monogram { font: 400 22px/1 var(--display); }

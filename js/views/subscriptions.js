@@ -1,10 +1,31 @@
 // Subscriptions: things paid every month or every year. Shown under Budget.
 import { state, newId, categoriesOf, categoryById, saveSubscription, removeSubscription, saveTransaction, removeTransaction,
-  subscriptionStatus, chargeDateIn, monthlyCost, yearlyCost } from '../store.js?v=202611231322';
-import { icon } from '../icons.js?v=202611231322';
-import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231322';
-import { head, showError, categoryChips } from './sheets.js?v=202611231322';
-import { budgetNav } from './budget.js?v=202611231322';
+  subscriptionStatus, chargeDateIn, monthlyCost, yearlyCost } from '../store.js?v=202611231328';
+import { icon } from '../icons.js?v=202611231328';
+import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231328';
+import { head, showError, categoryChips } from './sheets.js?v=202611231328';
+import { BRANDS } from '../brands.js?v=202611231328';
+import { budgetNav } from './budget.js?v=202611231328';
+
+// The service's logo if we know it, otherwise its first letter on the category colour.
+const squash = (name) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+export function findBrand(name) {
+  const key = squash(name);
+  return BRANDS.find((b) => b.aliases.some((a) => key === a || key.startsWith(a)));
+}
+function serviceBubble(s) {
+  const b = findBrand(s.name);
+  if (b) {
+    const [r, g, bl] = [0, 2, 4].map((i) => parseInt(b.hex.slice(i, i + 2), 16));
+    const fg = 0.299 * r + 0.587 * g + 0.114 * bl > 160 ? '#1B1A17' : '#FFFFFF';
+    return `<span class="bubble brand" style="background:#${b.hex};color:${fg}" title="${esc(b.title)}"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${b.path}"/></svg></span>`;
+  }
+  const c = categoryById(s.categoryId);
+  return `<span class="bubble monogram tone-${c ? c.color : 'sky'}" aria-hidden="true">${esc(s.name.trim().charAt(0).toUpperCase() || '?')}</span>`;
+}
+
+// "4 Nov", or "4 Nov 2027" when it is not this year.
+const withYear = (d) => (d.slice(0, 4) === todayISO().slice(0, 4) ? shortDate(d) : `${shortDate(d)} ${d.slice(0, 4)}`);
 
 const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
 const monthName = (m) => new Date(2026, m - 1, 1).toLocaleDateString('en-GB', { month: 'long' });
@@ -53,17 +74,16 @@ export function summaryTile() {
 }
 
 function subRow({ s, st }) {
-  const c = categoryById(s.categoryId);
   return `
     <li>
       <button type="button" class="row" data-action="sub-edit" data-id="${s.id}">
-        <span class="bubble tone-${c ? c.color : 'sky'}">${icon(c ? c.icon : 'receipt', 18)}</span>
+        ${serviceBubble(s)}
         <span class="row-main">
           <span class="row-title">${esc(s.name)}</span>
           <span class="row-sub wrap">${money(s.amount)} ${when(s)}</span>
         </span>
         <span class="row-end">
-          <span class="status-pill${st.due ? ' is-due' : ''}">${st.due ? 'Due' : shortDate(st.date)}</span>
+          <span class="status-pill${st.due ? ' is-due' : ''}">${st.due ? 'Due' : withYear(st.date)}</span>
           ${st.paidThisMonth ? '<span class="row-sub">Paid this month</span>' : ''}
         </span>
       </button>
@@ -107,6 +127,7 @@ export function render() {
       <ul class="sub-due">
         ${due.map(({ s, st }) => `
           <li>
+            ${serviceBubble(s)}
             <span class="row-main">
               <span class="row-title">${esc(s.name)}</span>
               <span class="row-sub">${money(s.amount)} · due ${shortDate(st.date)}</span>
