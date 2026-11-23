@@ -357,8 +357,7 @@ a.tile:hover { transform: translateY(-2px); }
 .cat-figure { margin-top: auto; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
 .cat-figure small { font-size: 13px; font-weight: 600; color: var(--on-tone-2); letter-spacing: 0; }
 .cat-status { font-size: 13px; color: var(--on-tone-2); }
-.cat.is-over .cat-status { font-weight: 700; color: var(--on-tone); }
-.cat.is-over .cat-status::before { content: '! '; }
+.cat.is-over .cat-status { color: var(--on-tone); }
 
 .hint { margin-top: 12px; font-size: 13px; color: var(--ink-2); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .chip-btn { min-height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13px; font-weight: 600; }

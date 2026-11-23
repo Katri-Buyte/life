@@ -1,10 +1,10 @@
-import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231525';
-import { icon } from '../icons.js?v=202611231525';
-import { homeTile as workoutsTile } from './workouts.js?v=202611231525';
-import { homeTile as wishlistTile } from './wishlist.js?v=202611231525';
-import { homeTile as journalTile } from './journal.js?v=202611231525';
-import { homeTile as vaultTile } from './vault.js?v=202611231525';
-import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231525';
+import { state, monthSummary, vaultSummary, categoryById, sum } from '../store.js?v=202611231547';
+import { icon } from '../icons.js?v=202611231547';
+import { homeTile as workoutsTile } from './workouts.js?v=202611231547';
+import { homeTile as wishlistTile } from './wishlist.js?v=202611231547';
+import { homeTile as journalTile } from './journal.js?v=202611231547';
+import { homeTile as vaultTile } from './vault.js?v=202611231547';
+import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231547';
 
 function greeting() {
   const h = new Date().getHours();
@@ -52,18 +52,17 @@ export function render() {
   const top = [...m.byCategory].sort((a, b) => b.spent - a.spent)[0];
   const recent = m.txns.slice(0, 4);
 
-  const hasBudget = m.budget > 0;
-  const left = m.budget - m.spent;
-  const pct = hasBudget ? Math.min(100, Math.round((m.spent / m.budget) * 100)) : 0;
-
-  const budgetTile = hasBudget
-    ? `<span class="tile-label">${left >= 0 ? 'Left this month' : 'Over budget this month'}</span>
-       <span class="figure">${money(Math.abs(left))}</span>
-       <span class="meter" role="img" aria-label="${pct}% of the budget spent"><span style="width:${pct}%"></span></span>
-       <span class="tile-line">${money(m.spent)} spent of ${moneyShort(m.budget)}</span>`
+  // What is left of this month's money: income, minus spending, minus what went into the vault.
+  // Category limits are shown on their own cards in Budget, never as one headline number here.
+  const saved = vaultSummary(month).saved;
+  const left = m.income - m.spent - saved;
+  const budgetTile = m.income
+    ? `<span class="tile-label">Left this month</span>
+       <span class="figure">${left < 0 ? '−' : ''}${money(Math.abs(left))}</span>
+       <span class="tile-line">${left < 0 ? `${money(-left)} more went out than came in. ` : ''}${money(m.income)} in, ${money(m.spent)} spent${saved ? `, ${money(saved)} saved` : ''}</span>`
     : `<span class="tile-label">Spent this month</span>
        <span class="figure">${money(m.spent)}</span>
-       <span class="tile-line">No monthly budget yet. Open Budget and pick a category to set one.</span>`;
+       <span class="tile-line">Your income for this month is not in yet. Once it is, this shows what is left.</span>`;
 
   return `
     <header class="page-head page-head-home">

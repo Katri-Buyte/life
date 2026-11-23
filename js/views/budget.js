@@ -1,9 +1,9 @@
-import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231525';
-import { icon } from '../icons.js?v=202611231525';
-import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231525';
-import { txnRow } from './home.js?v=202611231525';
-import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231525';
-import * as vault from './vault.js?v=202611231525';
+import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231547';
+import { icon } from '../icons.js?v=202611231547';
+import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231547';
+import { txnRow } from './home.js?v=202611231547';
+import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231547';
+import * as vault from './vault.js?v=202611231547';
 
 let month = monthOf(todayISO());
 
@@ -101,7 +101,7 @@ function categoryCard({ category: c, spent }) {
   const has = c.budget > 0;
   const pct = has ? Math.min(100, Math.round((spent / c.budget) * 100)) : 0;
   const diff = c.budget - spent;
-  const status = !has ? 'No limit set' : diff >= 0 ? `${money(diff)} left` : `${money(-diff)} over`;
+  const status = !has ? 'No limit set' : diff >= 0 ? `${money(diff)} left` : `${money(-diff)} more than planned`;
   return `
     <li>
       <button type="button" class="cat tone-${c.color}${has && diff < 0 ? ' is-over' : ''}" data-action="edit-cat" data-id="${c.id}">
@@ -130,10 +130,10 @@ function transactionList(txns) {
 
 export function render() {
   const m = monthSummary(month);
-  const hasBudget = m.budget > 0;
   const saved = vaultSummary(month).saved; // put into the vault this month, minus anything taken out
-  // Without a budget: what is left of this month's income after spending and saving.
-  const left = hasBudget ? m.budget - m.spent : m.income - m.spent - saved;
+  // What is left of this month's income after spending and saving. Category limits are
+  // shown on their own cards below, never as one headline "over budget" number.
+  const left = m.income - m.spent - saved;
   const isNow = month === monthOf(todayISO());
 
   return `
@@ -152,9 +152,13 @@ export function render() {
 
     <section class="bento bento-3" aria-label="Month totals">
       <div class="tile tone-butter span-2-sm">
-        <span class="tile-label">${hasBudget ? (left >= 0 ? 'Left to spend' : 'Over budget') : 'Left after spending and saving'}</span>
-        <span class="figure">${left < 0 && !hasBudget ? '−' : ''}${money(Math.abs(left))}</span>
-        <span class="tile-line">${hasBudget ? `of a ${moneyShort(m.budget)} monthly budget` : `${money(m.income)} in, ${money(m.spent)} spent, ${saved < 0 ? `${money(-saved)} taken out of` : `${money(saved)} put in`} the vault`}</span>
+        ${m.income ? `
+        <span class="tile-label">Left this month</span>
+        <span class="figure">${left < 0 ? '−' : ''}${money(Math.abs(left))}</span>
+        <span class="tile-line">${left < 0 ? `${money(-left)} more went out than came in. ` : ''}${money(m.income)} in, ${money(m.spent)} spent, ${saved < 0 ? `${money(-saved)} taken out of` : `${money(saved)} put in`} the vault</span>` : `
+        <span class="tile-label">Spent this month</span>
+        <span class="figure">${money(m.spent)}</span>
+        <span class="tile-line">No income added for ${monthLabel(month)} yet. Once it is, this shows what is left.</span>`}
       </div>
       <div class="tile tone-pink">
         <span class="tile-label">Spent</span>
