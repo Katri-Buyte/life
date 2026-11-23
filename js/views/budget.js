@@ -1,4 +1,4 @@
-import { monthSummary, categoriesOf } from '../store.js';
+import { monthSummary, categoriesOf, vaultSummary } from '../store.js';
 import { icon } from '../icons.js';
 import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js';
 import { txnRow } from './home.js';
@@ -79,7 +79,9 @@ function transactionList(txns) {
 export function render() {
   const m = monthSummary(month);
   const hasBudget = m.budget > 0;
-  const left = hasBudget ? m.budget - m.spent : m.income - m.spent;
+  const saved = vaultSummary(month).saved; // put into the vault this month, minus anything taken out
+  // Without a budget: what is left of this month's income after spending and saving.
+  const left = hasBudget ? m.budget - m.spent : m.income - m.spent - saved;
   const isNow = month === monthOf(todayISO());
 
   return `
@@ -94,9 +96,9 @@ export function render() {
 
     <section class="bento bento-3" aria-label="Month totals">
       <div class="tile tone-butter span-2-sm">
-        <span class="tile-label">${hasBudget ? (left >= 0 ? 'Left to spend' : 'Over budget') : 'Income minus spending'}</span>
+        <span class="tile-label">${hasBudget ? (left >= 0 ? 'Left to spend' : 'Over budget') : 'Left after spending and saving'}</span>
         <span class="figure">${left < 0 && !hasBudget ? '−' : ''}${money(Math.abs(left))}</span>
-        <span class="tile-line">${hasBudget ? `of a ${moneyShort(m.budget)} monthly budget` : 'Set limits on categories below to get a budget'}</span>
+        <span class="tile-line">${hasBudget ? `of a ${moneyShort(m.budget)} monthly budget` : `${money(m.income)} in, ${money(m.spent)} spent, ${saved < 0 ? `${money(-saved)} taken out of` : `${money(saved)} put in`} the vault`}</span>
       </div>
       <div class="tile tone-pink">
         <span class="tile-label">Spent</span>
