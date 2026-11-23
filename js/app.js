@@ -1,12 +1,12 @@
-import { state, init, subscribe, signIn, signOut } from './store.js';
-import { icon } from './icons.js';
-import { closeSheet, toast, todayISO } from './ui.js';
-import * as home from './views/home.js';
-import * as budget from './views/budget.js';
-import * as settings from './views/settings.js';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231309';
+import { icon } from './icons.js?v=202611231309';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231309';
+import * as home from './views/home.js?v=202611231309';
+import * as budget from './views/budget.js?v=202611231309';
+import * as settings from './views/settings.js?v=202611231309';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231309';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231309';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231309';
 
 const routes = {
   home: { title: 'Home', view: home },

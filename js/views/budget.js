@@ -1,8 +1,8 @@
-import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js';
-import { icon } from '../icons.js';
-import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js';
-import { txnRow } from './home.js';
-import * as vault from './vault.js';
+import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231309';
+import { icon } from '../icons.js?v=202611231309';
+import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231309';
+import { txnRow } from './home.js?v=202611231309';
+import * as vault from './vault.js?v=202611231309';
 
 let month = monthOf(todayISO());
 
