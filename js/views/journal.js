@@ -1,10 +1,11 @@
 // Journal: routines and one-off tasks spread over the week, a daily check-in,
 // and a gentle warning when a day holds more than feels comfortable.
 import { state, newId, itemsOn, markFor, dayEntry, daySummary, weekday,
-  saveJournalItem, removeJournalItem, saveJournalMark, removeJournalMark, saveJournalDay, saveJournalSettings } from '../store.js?v=202611231400';
-import { icon } from '../icons.js?v=202611231400';
-import { esc, iso, todayISO, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231400';
-import { head, showError } from './sheets.js?v=202611231400';
+  saveJournalItem, removeJournalItem, saveJournalMark, removeJournalMark, saveJournalDay, saveJournalSettings } from '../store.js?v=202611231409';
+import { icon } from '../icons.js?v=202611231409';
+import { esc, iso, todayISO, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231409';
+import * as diary from './diary.js?v=202611231409';
+import { head, showError } from './sheets.js?v=202611231409';
 
 export const TYPES = [
   { id: 'cleaning', name: 'Cleaning', icon: 'sparkles', tone: 'sky' },
@@ -20,7 +21,7 @@ const PARTS = [
   { id: 'evening', name: 'Evening', icon: 'moon' },
   { id: 'anytime', name: 'Anytime', icon: 'clock' },
 ];
-const ENERGY = ['', 'Drained', 'Low', 'Okay', 'Good', 'Great'];
+export const ENERGY = ['', 'Drained', 'Low', 'Okay', 'Good', 'Great'];
 const MOODS = ['Calm', 'Happy', 'Motivated', 'Tired', 'Stressed', 'Overwhelmed', 'Anxious', 'Sad'];
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -85,9 +86,10 @@ export function shiftDay(n) { setDay(addDays(day, n)); }
 export function shiftWeek(n) { weekStart = addDays(weekStart, 7 * n); }
 export function thisWeek() { weekStart = mondayOf(todayISO()); }
 
-const journalNav = (active) => `
+export const journalNav = (active) => `
   <nav class="subnav" aria-label="Journal sections">
     <a href="#/journal" ${active === 'today' ? 'aria-current="page"' : ''}>Day</a>
+    <a href="#/journal/diary" ${active === 'diary' ? 'aria-current="page"' : ''}>Diary</a>
     <a href="#/journal/week" ${active === 'week' ? 'aria-current="page"' : ''}>Week</a>
     <a href="#/journal/routines" ${active === 'routines' ? 'aria-current="page"' : ''}>Routines</a>
   </nav>`;
@@ -124,6 +126,7 @@ function wordCard(date, isToday) {
       <p class="word">${w}</p>
       <p class="help"><em>${kind}</em> · ${meaning}</p>
       <p class="word-q">${question}</p>
+      <a class="link" href="#/journal/diary">${icon('pen-line', 16)}&nbsp;Write about it in your diary</a>
     </section>`;
 }
 
@@ -324,11 +327,14 @@ function renderRoutines() {
 }
 
 export function render(param) {
+  if (param === 'diary') return diary.render();
   if (param === 'week') return renderWeek();
   if (param === 'routines') return renderRoutines();
   return renderDay();
 }
-export const title = (param) => (param === 'week' ? 'Week' : param === 'routines' ? 'Routines' : 'Journal');
+export const title = (param) => (param === 'diary' ? 'Diary' : param === 'week' ? 'Week' : param === 'routines' ? 'Routines' : 'Journal');
+export function mount(root, param) { if (param === 'diary') diary.mount(root); }
+export const openGoals = () => diary.openGoals();
 
 // ---------- Actions ----------
 
@@ -595,7 +601,7 @@ export function openCapacity() {
     showError(form, 'capacity', ok ? '' : 'Type whole minutes between 10 and 1440, for example 120');
     if (!ok) return;
     closeSheet();
-    try { await saveJournalSettings({ capacity }); toast('Saved'); } catch { saveFailed(); }
+    try { await saveJournalSettings({ ...state.journalSettings, capacity }); toast('Saved'); } catch { saveFailed(); }
   });
 }
 

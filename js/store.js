@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231400';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231409';
 
 export const state = {
   ready: false,
@@ -12,8 +12,8 @@ export const state = {
   vaultEntries: [],   // { id, date, amount (cents, negative = taken out), note, createdAt }
   journalItems: [],   // { id, title, type, days [1-7, Mon = 1] for routines, date 'YYYY-MM-DD' for one-offs, part, minutes, createdAt }
   journalMarks: [],   // { id, itemId, date, status 'done'|'skipped' }
-  journalDays: [],    // { id (= date), date, energy 1-5 or 0, mood, note }
-  journalSettings: { capacity: 120 }, // minutes that feel like a comfortable day
+  journalDays: [],    // { id (= date), date, energy 1-5 or 0, mood, note, trackers {water, steps, ...}, answers {question key: text} }
+  journalSettings: { capacity: 120, goals: {} }, // capacity: minutes that feel like a comfortable day; goals: daily tracker goals
   wishlist: [],       // { id, name, url, price (cents or 0), priority 'need'|'want'|'someday', note, boughtOn 'YYYY-MM-DD' or '', transactionId, createdAt }
   subscriptions: [],  // { id, name, amount (cents), cycle 'monthly'|'yearly', day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
 };
@@ -45,12 +45,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231400');
+    const { create } = await import('./adapters/supabase.js?v=202611231409');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231400');
+    const { create } = await import('./adapters/local.js?v=202611231409');
     adapter = create();
   }
   await reload();
@@ -67,7 +67,7 @@ async function reload() {
   state.journalItems = data.journalItems || [];
   state.journalMarks = data.journalMarks || [];
   state.journalDays = data.journalDays || [];
-  state.journalSettings = { capacity: 120, ...data.journalSettings };
+  state.journalSettings = { capacity: 120, goals: {}, ...data.journalSettings };
   if (!state.categories.length) {
     state.categories = DEFAULT_CATEGORIES.map(([name, kind, color, icon], sort) => ({ id: newId(), name, kind, color, icon, budget: 0, sort }));
     for (const c of state.categories) await adapter.saveCategory(c);
@@ -93,7 +93,7 @@ export async function signOut() {
   state.journalItems = [];
   state.journalMarks = [];
   state.journalDays = [];
-  state.journalSettings = { capacity: 120 };
+  state.journalSettings = { capacity: 120, goals: {} };
   emit();
 }
 
@@ -165,10 +165,27 @@ export function saveJournalMark(m) {
 export function removeJournalMark(id) {
   return commit(() => { state.journalMarks = state.journalMarks.filter((m) => m.id !== id); }, () => adapter.removeJournalMark(id));
 }
+const blankDay = (date) => ({ id: date, date, energy: 0, mood: '', note: '', trackers: {}, answers: {} });
+
+// Saves part of a day (a check-in, say) without losing the rest of that day's entry.
 export function saveJournalDay(d) {
-  const day = { ...d, id: d.date };
+  const prev = state.journalDays.find((x) => x.date === d.date) || blankDay(d.date);
+  const day = { ...prev, ...d, id: d.date };
   return commit(() => { state.journalDays = withItem(state.journalDays, day); }, () => adapter.saveJournalDay(day));
 }
+// The diary saves while you type. This updates the day at once without redrawing
+// the screen (that would move the cursor); persistJournalDay then writes it.
+export function patchJournalDay(date, patch) {
+  const prev = state.journalDays.find((x) => x.date === date) || blankDay(date);
+  const next = { ...prev, ...patch, trackers: { ...prev.trackers, ...(patch.trackers || {}) }, answers: { ...prev.answers, ...(patch.answers || {}) } };
+  state.journalDays = withItem(state.journalDays, next);
+  return next;
+}
+export function persistJournalDay(date) {
+  const d = state.journalDays.find((x) => x.date === date);
+  return d ? adapter.saveJournalDay(d) : Promise.resolve();
+}
+
 export function saveJournalSettings(s) {
   return commit(() => { state.journalSettings = s; }, () => adapter.saveJournalSettings(s));
 }

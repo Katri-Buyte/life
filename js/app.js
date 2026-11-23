@@ -1,15 +1,15 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231400';
-import { icon } from './icons.js?v=202611231400';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231400';
-import * as home from './views/home.js?v=202611231400';
-import * as budget from './views/budget.js?v=202611231400';
-import * as settings from './views/settings.js?v=202611231400';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231400';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231400';
-import * as wishlist from './views/wishlist.js?v=202611231400';
-import * as journal from './views/journal.js?v=202611231400';
-import * as subscriptions from './views/subscriptions.js?v=202611231400';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231400';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231409';
+import { icon } from './icons.js?v=202611231409';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231409';
+import * as home from './views/home.js?v=202611231409';
+import * as budget from './views/budget.js?v=202611231409';
+import * as settings from './views/settings.js?v=202611231409';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231409';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231409';
+import * as wishlist from './views/wishlist.js?v=202611231409';
+import * as journal from './views/journal.js?v=202611231409';
+import * as subscriptions from './views/subscriptions.js?v=202611231409';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231409';
 
 const routes = {
   home: { title: 'Home', view: home },
@@ -100,6 +100,8 @@ const actions = {
   'j-template': (el) => journal.openTemplate(el.dataset.n),
   'j-checkin': () => journal.openCheckIn(),
   'j-capacity': () => journal.openCapacity(),
+  'diary-goals': () => journal.openGoals(),
+  'diary-day': (el) => { journal.setDay(el.dataset.date); render(); window.scrollTo(0, 0); },
   'jday-prev': () => { journal.shiftDay(-1); render(); },
   'jday-next': () => { journal.shiftDay(1); render(); },
   'jday-today': () => { journal.setDay(todayISO()); render(); },

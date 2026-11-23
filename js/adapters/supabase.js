@@ -16,7 +16,7 @@ const itemToRow = (i) => ({ id: i.id, title: i.title, type: i.type, days: i.days
 const rowToItem = (r) => ({ id: r.id, title: r.title, type: r.type, days: r.days || [], date: r.date, part: r.part, minutes: r.minutes, createdAt: r.created_at });
 const markToRow = (m) => ({ id: m.id, item_id: m.itemId, date: m.date, status: m.status });
 const rowToMark = (r) => ({ id: r.id, itemId: r.item_id, date: r.date, status: r.status });
-const rowToDay = (r) => ({ id: r.date, date: r.date, energy: r.energy || 0, mood: r.mood || '', note: r.note || '' });
+const rowToDay = (r) => ({ id: r.date, date: r.date, energy: r.energy || 0, mood: r.mood || '', note: r.note || '', trackers: r.trackers || {}, answers: r.answers || {} });
 
 const wishToRow = (w) => ({ id: w.id, name: w.name, url: w.url, price_cents: w.price || null, priority: w.priority, note: w.note, bought_on: w.boughtOn || null, transaction_id: w.transactionId || null, created_at: w.createdAt });
 const rowToWish = (r) => ({ id: r.id, name: r.name, url: r.url || '', price: r.price_cents || 0, priority: r.priority, note: r.note || '', boughtOn: r.bought_on || '', transactionId: r.transaction_id || '', createdAt: r.created_at });
@@ -79,7 +79,7 @@ export async function create(url, key) {
         journalItems: items.map(rowToItem),
         journalMarks: marks.map(rowToMark),
         journalDays: days.data.map(rowToDay),
-        journalSettings: js.data ? { capacity: js.data.capacity_minutes } : {},
+        journalSettings: js.data ? { capacity: js.data.capacity_minutes, goals: js.data.goals || {} } : {},
       };
     },
     async saveCategory(c) { check(await sb.from('budget_categories').upsert(catToRow(c))); },
@@ -99,11 +99,11 @@ export async function create(url, key) {
     async saveJournalMark(m) { check(await sb.from('journal_marks').upsert(markToRow(m))); },
     async removeJournalMark(id) { check(await sb.from('journal_marks').delete().eq('id', id)); },
     async saveJournalDay(d) {
-      check(await sb.from('journal_days').upsert({ date: d.date, energy: d.energy || null, mood: d.mood, note: d.note }, { onConflict: 'user_id,date' }));
+      check(await sb.from('journal_days').upsert({ date: d.date, energy: d.energy || null, mood: d.mood || '', note: d.note || '', trackers: d.trackers || {}, answers: d.answers || {} }, { onConflict: 'user_id,date' }));
     },
     async saveJournalSettings(s) {
       const { data } = await sb.auth.getSession();
-      check(await sb.from('journal_settings').upsert({ user_id: data.session.user.id, capacity_minutes: s.capacity }));
+      check(await sb.from('journal_settings').upsert({ user_id: data.session.user.id, capacity_minutes: s.capacity, goals: s.goals || {} }));
     },
     async saveSubscription(s) { check(await sb.from('subscriptions').upsert(subToRow(s))); },
     async removeSubscription(id) { check(await sb.from('subscriptions').delete().eq('id', id)); },

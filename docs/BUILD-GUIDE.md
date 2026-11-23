@@ -1,6 +1,6 @@
 # Life: build guide for a Claude agent
 
-This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a wishlist, a journal of routines and check-ins, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
+This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a wishlist, a journal of routines and check-ins, a mindfulness diary, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
 
 Read the whole guide before starting. Steps marked **(person)** need the person themself: creating accounts, choosing passwords and signing in. Never type a password for them and never ask them to paste one to you.
 
@@ -20,6 +20,7 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
   - Day view: a check-in (energy, mood, a private note) shown as "Today's vibe", a word for the day with a short meaning and a question, how full the day is against the person's comfortable number of minutes, and the list grouped by part of day with a tap to tick off.
   - A plain notice when the day is over the comfortable amount or energy is low, and one-tap Move to tomorrow or Skip, with Undo. Moving a routine skips it that day and adds a one-off copy the next day.
   - Week view with each day's load and energy, and a Routines page with starter ideas.
+  - Diary: one entry per day. Tracker cards (water, steps, sleep, movement, time outside, home-cooked meals) with editable daily goals, a meter, plus and minus buttons and a 7-day average; a question of the day; three things to be grateful for; what drained and what gave energy; the one thing that matters tomorrow; three more questions behind "More questions"; and free writing. It saves while typing (shown as "Saving…" then "Saved") without redrawing the page, and lists earlier entries.
 - **Recipes**: recipe list with search and category filters, recipe pages with a servings stepper that rescales ingredients, macros per serving and Ninja Speedi settings, and a weekly meal plan with daily macro totals and a tickable shopping list.
 - **Settings**: where the data lives, sign out, and a JSON backup download.
 
@@ -38,7 +39,7 @@ js/store.js              all data and calculations; screens read `state` and cal
 js/adapters/supabase.js  database reads and writes
 js/adapters/local.js     same interface, saved in the browser only
 js/config.js             Supabase URL and publishable key, recipe data location
-js/views/*.js            one file per screen (home, budget, vault, subscriptions, wishlist, journal, sheets, recipes, settings)
+js/views/*.js            one file per screen (home, budget, vault, subscriptions, wishlist, journal, diary, sheets, recipes, settings)
 js/icons.js              UI icons, generated from Lucide (ISC licence)
 js/brands.js             service logos, generated from Simple Icons (CC0)
 data/recipes.json        recipes and categories
@@ -49,7 +50,7 @@ serve.js                 local preview server: node serve.js  ->  http://localho
 tools/bump-version.js    run before publishing any change (see section 5)
 ```
 
-**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `wishlist_items`, `journal_items`, `journal_marks` (done or skipped per day), `journal_days` (check-ins, one row per date) and `journal_settings` (comfortable minutes per day). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
+**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `wishlist_items`, `journal_items`, `journal_marks` (done or skipped per day), `journal_days` (check-in, diary trackers and answers, one row per date) and `journal_settings` (comfortable minutes per day and diary goals). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
 
 **Design system**: cream background, pastel tiles (butter, pink, sage, sky, lavender, peach) with dark text in both light and dark mode, black pill buttons, a dark bottom bar on phones with a pink plus button, and a sidebar on desktop. On phones the bar holds Home, Budget, the plus button, Journal and Recipes; Settings is the gear on Home. The plus button adds a transaction, or a journal item while in Journal. Fonts: Instrument Serif for headings, Plus Jakarta Sans for text. Built to Apple's Human Interface Guidelines translated to the web: visible labels and inline errors on every field, Undo instead of confirmation dialogs for reversible actions, every chart with a title, period, one-sentence takeaway and a table view, targets of 44 px on touch, and colour never the only signal.
 
@@ -118,6 +119,7 @@ The original was built in one long session, one module at a time, each tested in
 7. **Subscriptions**, then **service logos**.
 8. **Journal**, so routines like cleaning, market runs and workouts are spread over the week with a check-in and a word for the day, and the app says when a day is too full.
 9. **Wishlist**, with a link to each item and a "Bought it" step that can log the expense.
+10. **Diary**, a mindfulness journal with daily trackers and guided questions, saved while typing.
 
 Planned but not built yet: phone notifications for the saving reminder (needs a service worker and a scheduled job), a fuller workouts module and a world scratch map.
 

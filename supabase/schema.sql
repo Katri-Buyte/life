@@ -192,3 +192,11 @@ create policy "own wishlist" on public.wishlist_items for all to authenticated u
 
 grant select, insert, update, delete on public.wishlist_items to authenticated;
 revoke all on public.wishlist_items from anon;
+
+-- Diary (added 2026-11-23): daily trackers and answers to the diary questions
+-- live on the same row as that day's check-in; goals for the trackers live in
+-- journal_settings.
+
+alter table public.journal_days add column if not exists trackers jsonb not null default '{}'::jsonb;
+alter table public.journal_days add column if not exists answers jsonb not null default '{}'::jsonb;
+alter table public.journal_settings add column if not exists goals jsonb not null default '{}'::jsonb;
