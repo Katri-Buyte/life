@@ -9,6 +9,9 @@ const rowToTxn = (r) => ({ id: r.id, date: r.date, amount: r.amount_cents, kind:
 const entryToRow = (e) => ({ id: e.id, date: e.date, amount_cents: e.amount, note: e.note, created_at: e.createdAt });
 const rowToEntry = (r) => ({ id: r.id, date: r.date, amount: r.amount_cents, note: r.note || '', createdAt: r.created_at });
 
+const subToRow = (s) => ({ id: s.id, name: s.name, amount_cents: s.amount, cycle: s.cycle, day: s.day, month: s.month, category_id: s.categoryId, handled_month: s.handled || '', created_at: s.createdAt });
+const rowToSub = (r) => ({ id: r.id, name: r.name, amount: r.amount_cents, cycle: r.cycle, day: r.day, month: r.month, categoryId: r.category_id, handled: r.handled_month || '', createdAt: r.created_at });
+
 export async function create(url, key) {
   const sb = createClient(url, key);
 
@@ -38,11 +41,12 @@ export async function create(url, key) {
     async signOut() { await sb.auth.signOut(); },
 
     async load() {
-      const [cats, txns, entries, settings] = await Promise.all([
+      const [cats, txns, entries, settings, subs] = await Promise.all([
         all('budget_categories', 'sort'),
         all('budget_transactions', 'date'),
         all('vault_entries', 'date'),
         sb.from('vault_settings').select('*').maybeSingle(),
+        all('subscriptions', 'created_at'),
       ]);
       if (settings.error) throw settings.error;
       const s = settings.data;
@@ -51,6 +55,7 @@ export async function create(url, key) {
         transactions: txns.map(rowToTxn),
         vault: s ? { salary: s.salary_cents, goal: s.goal_cents, starting: s.starting_cents } : {},
         vaultEntries: entries.map(rowToEntry),
+        subscriptions: subs.map(rowToSub),
       };
     },
     async saveCategory(c) { check(await sb.from('budget_categories').upsert(catToRow(c))); },
@@ -63,5 +68,7 @@ export async function create(url, key) {
     },
     async saveVaultEntry(e) { check(await sb.from('vault_entries').upsert(entryToRow(e))); },
     async removeVaultEntry(id) { check(await sb.from('vault_entries').delete().eq('id', id)); },
+    async saveSubscription(s) { check(await sb.from('subscriptions').upsert(subToRow(s))); },
+    async removeSubscription(id) { check(await sb.from('subscriptions').delete().eq('id', id)); },
   };
 }

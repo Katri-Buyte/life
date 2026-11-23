@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231309';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231322';
 
 export const state = {
   ready: false,
@@ -10,6 +10,7 @@ export const state = {
   transactions: [],   // { id, date 'YYYY-MM-DD', amount (cents), kind, categoryId, note, createdAt }
   vault: { salary: 0, goal: 0, starting: 0 }, // cents: monthly salary, monthly saving goal, savings held before using the app
   vaultEntries: [],   // { id, date, amount (cents, negative = taken out), note, createdAt }
+  subscriptions: [],  // { id, name, amount (cents), cycle 'monthly'|'yearly', day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
 };
 
 export const TONES = ['butter', 'pink', 'sage', 'sky', 'lavender', 'peach'];
@@ -39,12 +40,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231309');
+    const { create } = await import('./adapters/supabase.js?v=202611231322');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231309');
+    const { create } = await import('./adapters/local.js?v=202611231322');
     adapter = create();
   }
   await reload();
@@ -56,6 +57,7 @@ async function reload() {
   state.transactions = data.transactions;
   state.vault = { salary: 0, goal: 0, starting: 0, ...data.vault };
   state.vaultEntries = data.vaultEntries || [];
+  state.subscriptions = data.subscriptions || [];
   if (!state.categories.length) {
     state.categories = DEFAULT_CATEGORIES.map(([name, kind, color, icon], sort) => ({ id: newId(), name, kind, color, icon, budget: 0, sort }));
     for (const c of state.categories) await adapter.saveCategory(c);
@@ -76,6 +78,7 @@ export async function signOut() {
   state.transactions = [];
   state.vault = { salary: 0, goal: 0, starting: 0 };
   state.vaultEntries = [];
+  state.subscriptions = [];
   emit();
 }
 
@@ -116,6 +119,13 @@ export function saveVaultEntry(e) {
 }
 export function removeVaultEntry(id) {
   return commit(() => { state.vaultEntries = state.vaultEntries.filter((e) => e.id !== id); }, () => adapter.removeVaultEntry(id));
+}
+
+export function saveSubscription(s) {
+  return commit(() => { state.subscriptions = withItem(state.subscriptions, s); }, () => adapter.saveSubscription(s));
+}
+export function removeSubscription(id) {
+  return commit(() => { state.subscriptions = state.subscriptions.filter((s) => s.id !== id); }, () => adapter.removeSubscription(id));
 }
 
 // ---------- Reading helpers ----------
@@ -160,3 +170,39 @@ export function monthHistory(current) {
     return { month, income: m.income, spent: m.spent, saved, left: m.income - m.spent - saved };
   });
 }
+
+// ---------- Subscriptions ----------
+
+const pad2 = (n) => String(n).padStart(2, '0');
+const daysIn = (month) => { const [y, m] = month.split('-').map(Number); return new Date(y, m, 0).getDate(); };
+const addMonths = (month, by) => { const [y, m] = month.split('-').map(Number); const d = new Date(y, m - 1 + by, 1); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`; };
+
+// The payment date in a given month ('YYYY-MM'), or null if there is none that month.
+// A payment day the month does not have (31st in November) falls on the month's last day.
+export function chargeDateIn(s, month) {
+  if (s.cycle === 'yearly' && Number(month.slice(5, 7)) !== s.month) return null;
+  return `${month}-${pad2(Math.min(s.day, daysIn(month)))}`;
+}
+
+// True when this month's payment is already in the transactions: logged from here,
+// skipped, or typed in by hand with the subscription's name in the note.
+export function subscriptionPaid(s, month) {
+  if (s.handled === month) return true;
+  const name = s.name.trim().toLowerCase();
+  return transactionsIn(month).some((t) => t.kind === 'expense' && t.note.toLowerCase().includes(name));
+}
+
+// { due: bool, date: next or overdue payment date, month: that payment's month, paidThisMonth }
+export function subscriptionStatus(s, today) {
+  const now = today.slice(0, 7);
+  const thisDate = chargeDateIn(s, now);
+  const paidThisMonth = thisDate ? subscriptionPaid(s, now) : false;
+  if (thisDate && thisDate <= today && !paidThisMonth) return { due: true, date: thisDate, month: now, paidThisMonth };
+  if (thisDate && thisDate > today) return { due: false, date: thisDate, month: now, paidThisMonth };
+  let month = addMonths(now, 1);
+  while (!chargeDateIn(s, month)) month = addMonths(month, 1); // yearly: walk forward to its month
+  return { due: false, date: chargeDateIn(s, month), month, paidThisMonth };
+}
+
+export const monthlyCost = (s) => (s.cycle === 'yearly' ? Math.round(s.amount / 12) : s.amount);
+export const yearlyCost = (s) => (s.cycle === 'yearly' ? s.amount : s.amount * 12);

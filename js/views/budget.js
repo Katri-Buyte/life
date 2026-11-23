@@ -1,13 +1,20 @@
-import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231309';
-import { icon } from '../icons.js?v=202611231309';
-import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231309';
-import { txnRow } from './home.js?v=202611231309';
-import * as vault from './vault.js?v=202611231309';
+import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231322';
+import { icon } from '../icons.js?v=202611231322';
+import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231322';
+import { txnRow } from './home.js?v=202611231322';
+import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231322';
+import * as vault from './vault.js?v=202611231322';
 
 let month = monthOf(todayISO());
 
 export function shift(by) { month = shiftMonth(month, by); }
 export function setMonth(m) { month = m; }
+
+export const budgetNav = (active) => `
+  <nav class="subnav" aria-label="Budget sections">
+    <a href="#/budget" ${active === 'overview' ? 'aria-current="page"' : ''}>Overview</a>
+    <a href="#/subscriptions" ${active === 'subscriptions' ? 'aria-current="page"' : ''}>Subscriptions</a>
+  </nav>`;
 export const currentMonth = () => month;
 
 const shortMonth = (mm) => fromISO(mm + '-01').toLocaleDateString('en-GB', { month: 'short' });
@@ -131,12 +138,16 @@ export function render() {
   return `
     <header class="page-head page-head-row">
       <h1>Budget</h1>
+      ${budgetNav('overview')}
+    </header>
+
+    <div class="month-row">
       <div class="month" role="group" aria-label="Month">
         <button type="button" class="icon-btn" data-action="month-prev" aria-label="Previous month">${icon('chevron-left', 20)}</button>
         <span class="month-label" aria-live="polite">${monthLabel(month)}</span>
         <button type="button" class="icon-btn" data-action="month-next" aria-label="Next month" ${isNow ? 'disabled' : ''}>${icon('chevron-right', 20)}</button>
       </div>
-    </header>
+    </div>
 
     <section class="bento bento-3" aria-label="Month totals">
       <div class="tile tone-butter span-2-sm">
@@ -155,6 +166,8 @@ export function render() {
         <span class="tile-line">this month</span>
       </div>
     </section>
+
+    ${subscriptionsTile()}
 
     ${vault.render(month)}
 

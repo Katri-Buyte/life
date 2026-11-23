@@ -1,7 +1,7 @@
 // The add / edit sheets for transactions and categories.
-import { state, TONES, newId, categoriesOf, categoryById, saveTransaction, removeTransaction, saveCategory, removeCategory } from '../store.js?v=202611231309';
-import { icon } from '../icons.js?v=202611231309';
-import { esc, parseAmount, amountInput, todayISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231309';
+import { state, TONES, newId, categoriesOf, categoryById, saveTransaction, removeTransaction, saveCategory, removeCategory } from '../store.js?v=202611231322';
+import { icon } from '../icons.js?v=202611231322';
+import { esc, parseAmount, amountInput, todayISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231322';
 
 const ICONS = ['shopping-basket', 'utensils', 'zap', 'house', 'bus', 'plane', 'heart-pulse', 'dumbbell', 'gamepad-2', 'shopping-bag', 'gift', 'sparkles', 'receipt', 'piggy-bank', 'banknote', 'coins', 'ellipsis'];
 
@@ -22,7 +22,7 @@ export function showError(form, name, message) {
 
 // ---------- Transaction ----------
 
-const categoryChips = (kind, selected) => categoriesOf(kind).map((c) => `
+export const categoryChips = (kind, selected) => categoriesOf(kind).map((c) => `
   <label class="chip tone-${c.color}">
     <input type="radio" name="categoryId" value="${c.id}" ${c.id === selected ? 'checked' : ''}>
     <span>${icon(c.icon, 16)} ${esc(c.name)}</span>
@@ -111,7 +111,7 @@ export function openTransactionSheet(id) {
 export function openCategorySheet(id) {
   const existing = id ? categoryById(id) : null;
   const c = existing || { id: newId(), name: '', kind: 'expense', color: 'butter', icon: 'ellipsis', budget: 0, sort: state.categories.length };
-  const used = state.transactions.filter((t) => t.categoryId === c.id).length;
+  const used = state.transactions.filter((t) => t.categoryId === c.id).length + state.subscriptions.filter((s) => s.categoryId === c.id).length;
 
   const el = openSheet(`
     <form class="form" novalidate>
@@ -151,7 +151,7 @@ export function openCategorySheet(id) {
         </div>
       </fieldset>
 
-      ${existing && used ? `<p class="help">${used} ${used === 1 ? 'transaction uses' : 'transactions use'} this category, so it cannot be deleted. Move them to another category first.</p>` : ''}
+      ${existing && used ? `<p class="help">${used} ${used === 1 ? 'transaction or subscription uses' : 'transactions or subscriptions use'} this category, so it cannot be deleted. Move them to another category first.</p>` : ''}
 
       <div class="sheet-actions">
         ${existing && !used ? `<button type="button" class="btn btn-quiet btn-danger" data-delete>${icon('trash-2', 16)} Delete</button>` : '<span></span>'}

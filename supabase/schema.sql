@@ -86,3 +86,30 @@ grant select, insert, update, delete on
 revoke all on
   public.budget_categories, public.budget_transactions, public.vault_settings, public.vault_entries
   from anon;
+
+-- Subscriptions (added 2026-11-23). handled_month is the last month ('YYYY-MM')
+-- whose payment was logged or skipped from the app.
+
+create table if not exists public.subscriptions (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  name text not null,
+  amount_cents integer not null check (amount_cents > 0),
+  cycle text not null check (cycle in ('monthly', 'yearly')),
+  day integer not null check (day between 1 and 31),
+  month integer not null check (month between 1 and 12),
+  category_id uuid not null references public.budget_categories (id),
+  handled_month text not null default '',
+  created_at timestamptz not null default now()
+);
+
+alter table public.subscriptions enable row level security;
+
+drop policy if exists "own subscriptions" on public.subscriptions;
+create policy "own subscriptions" on public.subscriptions
+  for all to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+grant select, insert, update, delete on public.subscriptions to authenticated;
+revoke all on public.subscriptions from anon;

@@ -1,16 +1,18 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231309';
-import { icon } from './icons.js?v=202611231309';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231309';
-import * as home from './views/home.js?v=202611231309';
-import * as budget from './views/budget.js?v=202611231309';
-import * as settings from './views/settings.js?v=202611231309';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231309';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231309';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231309';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231322';
+import { icon } from './icons.js?v=202611231322';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231322';
+import * as home from './views/home.js?v=202611231322';
+import * as budget from './views/budget.js?v=202611231322';
+import * as settings from './views/settings.js?v=202611231322';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231322';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231322';
+import * as subscriptions from './views/subscriptions.js?v=202611231322';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231322';
 
 const routes = {
   home: { title: 'Home', view: home },
   budget: { title: 'Budget', view: budget },
+  subscriptions: { title: 'Subscriptions', view: subscriptions, nav: 'budget' },
   recipes: { title: 'Recipes', view: recipesView },
   plan: { title: 'Meal plan', view: planView, nav: 'recipes' },
   settings: { title: 'Settings', view: settings },
@@ -73,10 +75,14 @@ const actions = {
   'go-month': (el) => { budget.setMonth(el.dataset.month); render(); window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); },
   'month-prev': () => { budget.shift(-1); render(); },
   'month-next': () => { budget.shift(1); render(); },
+  'sub-add': () => subscriptions.openSubscriptionSheet(),
+  'sub-edit': (el) => subscriptions.openSubscriptionSheet(el.dataset.id),
+  'sub-log': (el) => subscriptions.logPayment(el.dataset.id),
+  'sub-skip': (el) => subscriptions.skipPayment(el.dataset.id),
   'recipes-retry': () => retryRecipes(),
   'sign-out': () => signOut(),
   export: () => {
-    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions }, null, 2)], { type: 'application/json' });
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `life-backup-${todayISO()}.json` });
     a.click();
     URL.revokeObjectURL(a.href);

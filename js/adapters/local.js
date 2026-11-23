@@ -4,9 +4,9 @@ const KEY = 'life.budget.v1';
 function read() {
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && Array.isArray(d.categories) && Array.isArray(d.transactions)) return { vault: {}, vaultEntries: [], ...d };
+    if (d && Array.isArray(d.categories) && Array.isArray(d.transactions)) return { vault: {}, vaultEntries: [], subscriptions: [], ...d };
   } catch { /* fall through to empty */ }
-  return { categories: [], transactions: [], vault: {}, vaultEntries: [] };
+  return { categories: [], transactions: [], vault: {}, vaultEntries: [], subscriptions: [] };
 }
 
 function write(d) {
@@ -28,5 +28,7 @@ export function create() {
     async saveVaultSettings(v) { const d = read(); d.vault = v; write(d); },
     async saveVaultEntry(e) { const d = read(); upsert(d.vaultEntries, e); write(d); },
     async removeVaultEntry(id) { const d = read(); d.vaultEntries = d.vaultEntries.filter((e) => e.id !== id); write(d); },
+    async saveSubscription(s) { const d = read(); upsert(d.subscriptions, s); write(d); },
+    async removeSubscription(id) { const d = read(); d.subscriptions = d.subscriptions.filter((s) => s.id !== id); write(d); },
   };
 }
