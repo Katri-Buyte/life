@@ -1,20 +1,22 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231353';
-import { icon } from './icons.js?v=202611231353';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231353';
-import * as home from './views/home.js?v=202611231353';
-import * as budget from './views/budget.js?v=202611231353';
-import * as settings from './views/settings.js?v=202611231353';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231353';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231353';
-import * as journal from './views/journal.js?v=202611231353';
-import * as subscriptions from './views/subscriptions.js?v=202611231353';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231353';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231400';
+import { icon } from './icons.js?v=202611231400';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231400';
+import * as home from './views/home.js?v=202611231400';
+import * as budget from './views/budget.js?v=202611231400';
+import * as settings from './views/settings.js?v=202611231400';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231400';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231400';
+import * as wishlist from './views/wishlist.js?v=202611231400';
+import * as journal from './views/journal.js?v=202611231400';
+import * as subscriptions from './views/subscriptions.js?v=202611231400';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231400';
 
 const routes = {
   home: { title: 'Home', view: home },
   budget: { title: 'Budget', view: budget },
   subscriptions: { title: 'Subscriptions', view: subscriptions, nav: 'budget' },
   journal: { title: 'Journal', view: journal },
+  wishlist: { title: 'Wishlist', view: wishlist, nav: 'budget' },
   recipes: { title: 'Recipes', view: recipesView },
   plan: { title: 'Meal plan', view: planView, nav: 'recipes' },
   settings: { title: 'Settings', view: settings },
@@ -84,6 +86,11 @@ const actions = {
   'sub-edit': (el) => subscriptions.openSubscriptionSheet(el.dataset.id),
   'sub-log': (el) => subscriptions.logPayment(el.dataset.id),
   'sub-skip': (el) => subscriptions.skipPayment(el.dataset.id),
+  'wish-add': () => wishlist.openWishSheet(),
+  'wish-edit': (el) => wishlist.openWishSheet(el.dataset.id),
+  'wish-bought': (el) => wishlist.openBoughtSheet(el.dataset.id),
+  'wish-unbuy': (el) => wishlist.unbuy(el.dataset.id),
+  'wish-filter': (el) => { wishlist.setFilter(el.dataset.filter); render(); },
   'j-add': () => journal.openItemSheet(),
   'j-add-routine': () => journal.openItemSheet(null, { date: null, days: [] }),
   'j-edit': (el) => journal.openItemSheet(el.dataset.id),
@@ -103,7 +110,7 @@ const actions = {
   'recipes-retry': () => retryRecipes(),
   'sign-out': () => signOut(),
   export: () => {
-    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions, journalItems: state.journalItems, journalMarks: state.journalMarks, journalDays: state.journalDays, journalSettings: state.journalSettings }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions, wishlist: state.wishlist, journalItems: state.journalItems, journalMarks: state.journalMarks, journalDays: state.journalDays, journalSettings: state.journalSettings }, null, 2)], { type: 'application/json' });
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `life-backup-${todayISO()}.json` });
     a.click();
     URL.revokeObjectURL(a.href);

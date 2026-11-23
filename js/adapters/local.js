@@ -4,9 +4,9 @@ const KEY = 'life.budget.v1';
 function read() {
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && Array.isArray(d.categories) && Array.isArray(d.transactions)) return { vault: {}, vaultEntries: [], subscriptions: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {}, ...d };
+    if (d && Array.isArray(d.categories) && Array.isArray(d.transactions)) return { vault: {}, vaultEntries: [], subscriptions: [], wishlist: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {}, ...d };
   } catch { /* fall through to empty */ }
-  return { categories: [], transactions: [], vault: {}, vaultEntries: [], subscriptions: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {} };
+  return { categories: [], transactions: [], vault: {}, vaultEntries: [], subscriptions: [], wishlist: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {} };
 }
 
 function write(d) {
@@ -29,6 +29,8 @@ export function create() {
     async saveVaultEntry(e) { const d = read(); upsert(d.vaultEntries, e); write(d); },
     async removeVaultEntry(id) { const d = read(); d.vaultEntries = d.vaultEntries.filter((e) => e.id !== id); write(d); },
     async saveSubscription(s) { const d = read(); upsert(d.subscriptions, s); write(d); },
+    async saveWish(w) { const d = read(); upsert(d.wishlist, w); write(d); },
+    async removeWish(id) { const d = read(); d.wishlist = d.wishlist.filter((w) => w.id !== id); write(d); },
     async saveJournalItem(i) { const d = read(); upsert(d.journalItems, i); write(d); },
     async removeJournalItem(id) { const d = read(); d.journalItems = d.journalItems.filter((i) => i.id !== id); d.journalMarks = d.journalMarks.filter((m) => m.itemId !== id); write(d); },
     async saveJournalMark(m) { const d = read(); upsert(d.journalMarks, m); write(d); },

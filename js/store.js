@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231353';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231400';
 
 export const state = {
   ready: false,
@@ -14,6 +14,7 @@ export const state = {
   journalMarks: [],   // { id, itemId, date, status 'done'|'skipped' }
   journalDays: [],    // { id (= date), date, energy 1-5 or 0, mood, note }
   journalSettings: { capacity: 120 }, // minutes that feel like a comfortable day
+  wishlist: [],       // { id, name, url, price (cents or 0), priority 'need'|'want'|'someday', note, boughtOn 'YYYY-MM-DD' or '', transactionId, createdAt }
   subscriptions: [],  // { id, name, amount (cents), cycle 'monthly'|'yearly', day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
 };
 
@@ -44,12 +45,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231353');
+    const { create } = await import('./adapters/supabase.js?v=202611231400');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231353');
+    const { create } = await import('./adapters/local.js?v=202611231400');
     adapter = create();
   }
   await reload();
@@ -62,6 +63,7 @@ async function reload() {
   state.vault = { salary: 0, goal: 0, starting: 0, ...data.vault };
   state.vaultEntries = data.vaultEntries || [];
   state.subscriptions = data.subscriptions || [];
+  state.wishlist = data.wishlist || [];
   state.journalItems = data.journalItems || [];
   state.journalMarks = data.journalMarks || [];
   state.journalDays = data.journalDays || [];
@@ -87,6 +89,7 @@ export async function signOut() {
   state.vault = { salary: 0, goal: 0, starting: 0 };
   state.vaultEntries = [];
   state.subscriptions = [];
+  state.wishlist = [];
   state.journalItems = [];
   state.journalMarks = [];
   state.journalDays = [];
@@ -138,6 +141,13 @@ export function saveSubscription(s) {
 }
 export function removeSubscription(id) {
   return commit(() => { state.subscriptions = state.subscriptions.filter((s) => s.id !== id); }, () => adapter.removeSubscription(id));
+}
+
+export function saveWish(w) {
+  return commit(() => { state.wishlist = withItem(state.wishlist, w); }, () => adapter.saveWish(w));
+}
+export function removeWish(id) {
+  return commit(() => { state.wishlist = state.wishlist.filter((w) => w.id !== id); }, () => adapter.removeWish(id));
 }
 
 export function saveJournalItem(i) {

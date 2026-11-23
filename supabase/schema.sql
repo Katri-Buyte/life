@@ -168,3 +168,27 @@ create policy "own journal settings" on public.journal_settings for all to authe
 
 grant select, insert, update, delete on public.journal_items, public.journal_marks, public.journal_days, public.journal_settings to authenticated;
 revoke all on public.journal_items, public.journal_marks, public.journal_days, public.journal_settings from anon;
+
+-- Wishlist (added 2026-11-23). bought_on is set when an item is marked as bought;
+-- transaction_id points to the expense logged for it, if any.
+
+create table if not exists public.wishlist_items (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  name text not null,
+  url text not null default '',
+  price_cents integer check (price_cents >= 0),
+  priority text not null default 'want' check (priority in ('need', 'want', 'someday')),
+  note text not null default '',
+  bought_on date,
+  transaction_id uuid,
+  created_at timestamptz not null default now()
+);
+
+alter table public.wishlist_items enable row level security;
+
+drop policy if exists "own wishlist" on public.wishlist_items;
+create policy "own wishlist" on public.wishlist_items for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+grant select, insert, update, delete on public.wishlist_items to authenticated;
+revoke all on public.wishlist_items from anon;

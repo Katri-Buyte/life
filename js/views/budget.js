@@ -1,9 +1,9 @@
-import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231353';
-import { icon } from '../icons.js?v=202611231353';
-import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231353';
-import { txnRow } from './home.js?v=202611231353';
-import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231353';
-import * as vault from './vault.js?v=202611231353';
+import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231400';
+import { icon } from '../icons.js?v=202611231400';
+import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231400';
+import { txnRow } from './home.js?v=202611231400';
+import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231400';
+import * as vault from './vault.js?v=202611231400';
 
 let month = monthOf(todayISO());
 
@@ -14,6 +14,7 @@ export const budgetNav = (active) => `
   <nav class="subnav" aria-label="Budget sections">
     <a href="#/budget" ${active === 'overview' ? 'aria-current="page"' : ''}>Overview</a>
     <a href="#/subscriptions" ${active === 'subscriptions' ? 'aria-current="page"' : ''}>Subscriptions</a>
+    <a href="#/wishlist" ${active === 'wishlist' ? 'aria-current="page"' : ''}>Wishlist</a>
   </nav>`;
 export const currentMonth = () => month;
 

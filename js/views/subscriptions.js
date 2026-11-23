@@ -1,11 +1,11 @@
 // Subscriptions: things paid every month or every year. Shown under Budget.
 import { state, newId, categoriesOf, categoryById, saveSubscription, removeSubscription, saveTransaction, removeTransaction,
-  subscriptionStatus, chargeDateIn, monthlyCost, yearlyCost } from '../store.js?v=202611231353';
-import { icon } from '../icons.js?v=202611231353';
-import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231353';
-import { head, showError, categoryChips } from './sheets.js?v=202611231353';
-import { BRANDS } from '../brands.js?v=202611231353';
-import { budgetNav } from './budget.js?v=202611231353';
+  subscriptionStatus, chargeDateIn, monthlyCost, yearlyCost } from '../store.js?v=202611231400';
+import { icon } from '../icons.js?v=202611231400';
+import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231400';
+import { head, showError, categoryChips } from './sheets.js?v=202611231400';
+import { BRANDS } from '../brands.js?v=202611231400';
+import { budgetNav } from './budget.js?v=202611231400';
 
 // The service's logo if we know it, otherwise its first letter on the category colour.
 const squash = (name) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
