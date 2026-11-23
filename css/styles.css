@@ -863,3 +863,4 @@ button.tile-checkin { text-align: left; }
 .set-btn { min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--ink); border-radius: 999px; background: none; color: var(--ink); font-weight: 700; }
 .set-btn[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
 .go-finish { display: grid; gap: 8px; justify-items: start; }
+.bubble.monogram svg { display: block; overflow: visible; }

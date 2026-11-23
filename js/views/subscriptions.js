@@ -1,12 +1,12 @@
 // Bills and subscriptions: things paid every month, every few months or every year.
 // Shown under Budget. Bills can vary in amount; then Log asks what was actually paid.
 import { state, newId, categoriesOf, categoryById, saveSubscription, removeSubscription, saveTransaction, removeTransaction,
-  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid, billPayments, usualAmount } from '../store.js?v=202611231547';
-import { icon } from '../icons.js?v=202611231547';
-import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231547';
-import { head, showError, categoryChips } from './sheets.js?v=202611231547';
-import { BRANDS } from '../brands.js?v=202611231547';
-import { budgetNav } from './budget.js?v=202611231547';
+  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid, billPayments, usualAmount } from '../store.js?v=202611231551';
+import { icon } from '../icons.js?v=202611231551';
+import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231551';
+import { head, showError, categoryChips } from './sheets.js?v=202611231551';
+import { BRANDS } from '../brands.js?v=202611231551';
+import { budgetNav } from './budget.js?v=202611231551';
 
 // The service's logo if we know it; otherwise a bill shows its category icon and a
 // subscription its first letter, on the category colour.
@@ -15,16 +15,67 @@ export function findBrand(name) {
   const key = squash(name);
   return BRANDS.find((b) => b.aliases.some((a) => key === a || key.startsWith(a)));
 }
+// ---------- Optical centring ----------
+// Logos and letters are placed by where their ink actually is, measured once on a
+// small canvas, so lopsided shapes (a cloud, a serif capital) look centred in the circle.
+
+const inkCache = new Map();
+
+// Logos: already centred by their outline; nudge them partway towards their visual
+// weight (60%), the way icon designers balance a shape in a circle. In 24-unit space.
+function logoNudge(d) {
+  if (inkCache.has(d)) return inkCache.get(d);
+  let nudge = [0, 0];
+  try {
+    const S = 4, N = 96, c = document.createElement('canvas'); c.width = c.height = N;
+    const g = c.getContext('2d'); g.scale(S, S); g.fill(new Path2D(d));
+    const px = g.getImageData(0, 0, N, N).data;
+    let sx = 0, sy = 0, n = 0;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { if (px[(y * N + x) * 4 + 3] > 40) { sx += x; sy += y; n++; } }
+    if (n) nudge = [-(sx / n / S - 12) * 0.6, -(sy / n / S - 12) * 0.6].map((v) => Math.round(v * 100) / 100);
+  } catch { /* keep it centred by its outline */ }
+  inkCache.set(d, nudge);
+  return nudge;
+}
+
+// Letters: measure the drawn capital and return where to place it in a 40 x 40 box.
+const LETTER_FONT = '"Instrument Serif", Georgia, serif';
+function letterPosition(ch) {
+  const key = `letter:${ch}`;
+  if (inkCache.has(key)) return inkCache.get(key);
+  let pos = [20, 27.5]; // a sensible guess until the font has loaded
+  const ready = !document.fonts || document.fonts.check(`100px ${LETTER_FONT}`);
+  try {
+    const c = document.createElement('canvas'); c.width = 200; c.height = 200;
+    const g = c.getContext('2d'); g.font = `400 100px ${LETTER_FONT}`; g.textBaseline = 'alphabetic';
+    g.fillText(ch, 50, 150);
+    const px = g.getImageData(0, 0, 200, 200).data;
+    let minX = 200, minY = 200, maxX = -1, maxY = -1;
+    for (let y = 0; y < 200; y++) for (let x = 0; x < 200; x++) {
+      if (px[(y * 200 + x) * 4 + 3] > 60) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+    }
+    if (maxX >= 0) {
+      const k = 22 / 100; // drawn at 100px, shown at 22px
+      pos = [20 - ((minX + maxX) / 2 - 50) * k, 20 - ((minY + maxY) / 2 - 150) * k].map((v) => Math.round(v * 100) / 100);
+    }
+  } catch { /* use the guess */ }
+  if (ready) inkCache.set(key, pos);
+  return pos;
+}
+
 function serviceBubble(s) {
   const b = findBrand(s.name);
   if (b) {
     const [r, g, bl] = [0, 2, 4].map((i) => parseInt(b.hex.slice(i, i + 2), 16));
     const fg = 0.299 * r + 0.587 * g + 0.114 * bl > 160 ? '#1B1A17' : '#FFFFFF';
-    return `<span class="bubble brand" style="background:#${b.hex};color:${fg}" title="${esc(b.title)}"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${b.path}"/></svg></span>`;
+    const [nx, ny] = logoNudge(b.path);
+    return `<span class="bubble brand" style="background:#${b.hex};color:${fg}" title="${esc(b.title)}"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${b.path}"${nx || ny ? ` transform="translate(${nx} ${ny})"` : ''}/></svg></span>`;
   }
   const c = categoryById(s.categoryId);
   if (s.kind === 'bill') return `<span class="bubble tone-${c ? c.color : 'butter'}" aria-hidden="true">${icon(c ? c.icon : 'zap', 18)}</span>`;
-  return `<span class="bubble monogram tone-${c ? c.color : 'sky'}" aria-hidden="true">${esc(s.name.trim().charAt(0).toUpperCase() || '?')}</span>`;
+  const ch = s.name.trim().charAt(0).toUpperCase() || '?';
+  const [x, y] = letterPosition(ch);
+  return `<span class="bubble monogram tone-${c ? c.color : 'sky'}" aria-hidden="true"><svg viewBox="0 0 40 40" width="40" height="40"><text x="${x}" y="${y}" font-family='${LETTER_FONT}' font-size="22" fill="currentColor">${esc(ch)}</text></svg></span>`;
 }
 
 // "4 Nov", or "4 Nov 2027" when it is not this year.

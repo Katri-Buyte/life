@@ -1,16 +1,16 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231547';
-import { icon } from './icons.js?v=202611231547';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231547';
-import * as home from './views/home.js?v=202611231547';
-import * as budget from './views/budget.js?v=202611231547';
-import * as settings from './views/settings.js?v=202611231547';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231547';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231547';
-import * as workouts from './views/workouts.js?v=202611231547';
-import * as wishlist from './views/wishlist.js?v=202611231547';
-import * as journal from './views/journal.js?v=202611231547';
-import * as subscriptions from './views/subscriptions.js?v=202611231547';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231547';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231551';
+import { icon } from './icons.js?v=202611231551';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231551';
+import * as home from './views/home.js?v=202611231551';
+import * as budget from './views/budget.js?v=202611231551';
+import * as settings from './views/settings.js?v=202611231551';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231551';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231551';
+import * as workouts from './views/workouts.js?v=202611231551';
+import * as wishlist from './views/wishlist.js?v=202611231551';
+import * as journal from './views/journal.js?v=202611231551';
+import * as subscriptions from './views/subscriptions.js?v=202611231551';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231551';
 
 const routes = {
   home: { title: 'Home', view: home },
@@ -162,6 +162,8 @@ document.addEventListener('submit', async (e) => {
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); view.focus({ preventScroll: true }); });
 subscribe(render);
 onRecipesLoaded(render);
+// Letters in logo circles are placed by measuring the font, so redraw once it has loaded.
+if (document.fonts) document.fonts.ready.then(() => { if (state.ready) render(); });
 
 render();
 init().catch(() => {
