@@ -236,3 +236,45 @@ create policy "own places" on public.places for all to authenticated using (user
 
 grant select, insert, update, delete on public.places to authenticated;
 revoke all on public.places from anon;
+
+-- Workouts (added 2026-11-23): workouts with their exercises. Exercise photos are
+-- shrunk in the browser and stored as small data URLs. A journal routine can point
+-- to the workout it plans; deleting the workout keeps the routine, unlinked.
+
+create table if not exists public.workouts (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  name text not null,
+  minutes integer not null default 30 check (minutes between 1 and 600),
+  tone text not null default 'pink',
+  note text not null default '',
+  sort integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.workout_exercises (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  workout_id uuid not null references public.workouts (id) on delete cascade,
+  name text not null,
+  image text not null default '',
+  area text not null default '',
+  sets integer not null default 1 check (sets between 1 and 20),
+  reps integer not null default 0 check (reps between 0 and 500),
+  seconds integer not null default 0 check (seconds between 0 and 7200),
+  note text not null default '',
+  sort integer not null default 0
+);
+
+alter table public.journal_items add column if not exists workout_id uuid references public.workouts (id) on delete set null;
+
+alter table public.workouts enable row level security;
+alter table public.workout_exercises enable row level security;
+
+drop policy if exists "own workouts" on public.workouts;
+create policy "own workouts" on public.workouts for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "own workout exercises" on public.workout_exercises;
+create policy "own workout exercises" on public.workout_exercises for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+grant select, insert, update, delete on public.workouts, public.workout_exercises to authenticated;
+revoke all on public.workouts, public.workout_exercises from anon;

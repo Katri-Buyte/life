@@ -12,8 +12,12 @@ const rowToEntry = (r) => ({ id: r.id, date: r.date, amount: r.amount_cents, not
 const subToRow = (s) => ({ id: s.id, kind: s.kind || 'subscription', variable: !!s.variable, every_months: s.every || 1, name: s.name, amount_cents: s.amount, cycle: s.cycle, day: s.day, month: s.month, category_id: s.categoryId, handled_month: s.handled || '', created_at: s.createdAt });
 const rowToSub = (r) => ({ id: r.id, kind: r.kind || 'subscription', variable: !!r.variable, every: r.every_months || 1, name: r.name, amount: r.amount_cents, cycle: r.cycle, day: r.day, month: r.month, categoryId: r.category_id, handled: r.handled_month || '', createdAt: r.created_at });
 
-const itemToRow = (i) => ({ id: i.id, title: i.title, type: i.type, days: i.days, date: i.date || null, part: i.part, minutes: i.minutes, created_at: i.createdAt });
-const rowToItem = (r) => ({ id: r.id, title: r.title, type: r.type, days: r.days || [], date: r.date, part: r.part, minutes: r.minutes, createdAt: r.created_at });
+const itemToRow = (i) => ({ id: i.id, title: i.title, type: i.type, days: i.days, date: i.date || null, part: i.part, minutes: i.minutes, workout_id: i.workoutId || null, created_at: i.createdAt });
+const rowToItem = (r) => ({ id: r.id, title: r.title, type: r.type, days: r.days || [], date: r.date, part: r.part, minutes: r.minutes, workoutId: r.workout_id || null, createdAt: r.created_at });
+const workoutToRow = (w) => ({ id: w.id, name: w.name, minutes: w.minutes, tone: w.tone, note: w.note || '', sort: w.sort || 0, created_at: w.createdAt });
+const rowToWorkout = (r) => ({ id: r.id, name: r.name, minutes: r.minutes, tone: r.tone, note: r.note || '', sort: r.sort || 0, createdAt: r.created_at });
+const exerciseToRow = (e) => ({ id: e.id, workout_id: e.workoutId, name: e.name, image: e.image || '', area: e.area || '', sets: e.sets || 1, reps: e.reps || 0, seconds: e.seconds || 0, note: e.note || '', sort: e.sort || 0 });
+const rowToExercise = (r) => ({ id: r.id, workoutId: r.workout_id, name: r.name, image: r.image || '', area: r.area || '', sets: r.sets, reps: r.reps, seconds: r.seconds, note: r.note || '', sort: r.sort || 0 });
 const markToRow = (m) => ({ id: m.id, item_id: m.itemId, date: m.date, status: m.status });
 const rowToMark = (r) => ({ id: r.id, itemId: r.item_id, date: r.date, status: r.status });
 const rowToDay = (r) => ({ id: r.date, date: r.date, energy: r.energy || 0, mood: r.mood || '', note: r.note || '', trackers: r.trackers || {}, answers: r.answers || {} });
@@ -61,13 +65,15 @@ export async function create(url, key) {
         all('subscriptions', 'created_at'),
       ]);
       // journal_days has no id column, so it is read on its own (one row per day, a few hundred a year).
-      const [items, marks, days, js, wishes, places] = await Promise.all([
+      const [items, marks, days, js, wishes, places, workouts, exercises] = await Promise.all([
         all('journal_items', 'created_at'),
         all('journal_marks', 'date'),
         sb.from('journal_days').select('*').order('date').limit(5000),
         sb.from('journal_settings').select('*').maybeSingle(),
         all('wishlist_items', 'created_at'),
         all('places', 'created_at'),
+        all('workouts', 'sort'),
+        all('workout_exercises', 'sort'),
       ]);
       if (days.error) throw days.error;
       if (js.error) throw js.error;
@@ -81,6 +87,8 @@ export async function create(url, key) {
         subscriptions: subs.map(rowToSub),
         wishlist: wishes.map(rowToWish),
         places: places.map(rowToPlace),
+        workouts: workouts.map(rowToWorkout),
+        exercises: exercises.map(rowToExercise),
         journalItems: items.map(rowToItem),
         journalMarks: marks.map(rowToMark),
         journalDays: days.data.map(rowToDay),
@@ -97,6 +105,10 @@ export async function create(url, key) {
     },
     async saveVaultEntry(e) { check(await sb.from('vault_entries').upsert(entryToRow(e))); },
     async removeVaultEntry(id) { check(await sb.from('vault_entries').delete().eq('id', id)); },
+    async saveWorkout(w) { check(await sb.from('workouts').upsert(workoutToRow(w))); },
+    async removeWorkout(id) { check(await sb.from('workouts').delete().eq('id', id)); },
+    async saveExercise(e) { check(await sb.from('workout_exercises').upsert(exerciseToRow(e))); },
+    async removeExercise(id) { check(await sb.from('workout_exercises').delete().eq('id', id)); },
     async savePlace(p) { check(await sb.from('places').upsert(placeToRow(p))); },
     async removePlace(id) { check(await sb.from('places').delete().eq('id', id)); },
     async saveWish(w) { check(await sb.from('wishlist_items').upsert(wishToRow(w))); },

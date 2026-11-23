@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231442';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231455';
 
 export const state = {
   ready: false,
@@ -10,10 +10,12 @@ export const state = {
   transactions: [],   // { id, date 'YYYY-MM-DD', amount (cents), kind, categoryId, note, createdAt }
   vault: { salary: 0, goal: 0, starting: 0 }, // cents: monthly salary, monthly saving goal, savings held before using the app
   vaultEntries: [],   // { id, date, amount (cents, negative = taken out), note, createdAt }
-  journalItems: [],   // { id, title, type, days [1-7, Mon = 1] for routines, date 'YYYY-MM-DD' for one-offs, part, minutes, createdAt }
+  journalItems: [],   // { id, title, type, days [1-7, Mon = 1] for routines, date 'YYYY-MM-DD' for one-offs, part, minutes, workoutId, createdAt }
   journalMarks: [],   // { id, itemId, date, status 'done'|'skipped' }
   journalDays: [],    // { id (= date), date, energy 1-5 or 0, mood, note, trackers {water, steps, ...}, answers {question key: text} }
   journalSettings: { capacity: 120, goals: {} }, // capacity: minutes that feel like a comfortable day; goals: daily tracker goals
+  workouts: [],       // { id, name, minutes, tone, note, sort, createdAt }
+  exercises: [],      // { id, workoutId, name, image (small data URL or ''), area, sets, reps, seconds, note, sort }
   places: [],         // { id, country (ISO alpha-2), status 'visited'|'want', year, note, createdAt }
   wishlist: [],       // { id, name, url, price (cents or 0), priority 'need'|'want'|'someday', note, boughtOn 'YYYY-MM-DD' or '', transactionId, createdAt }
   subscriptions: [],  // { id, kind 'subscription'|'bill', name, amount (cents; an estimate when variable), variable, cycle 'monthly'|'yearly', every (months, for monthly), day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
@@ -46,12 +48,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231442');
+    const { create } = await import('./adapters/supabase.js?v=202611231455');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231442');
+    const { create } = await import('./adapters/local.js?v=202611231455');
     adapter = create();
   }
   await reload();
@@ -66,6 +68,8 @@ async function reload() {
   state.subscriptions = data.subscriptions || [];
   state.wishlist = data.wishlist || [];
   state.places = data.places || [];
+  state.workouts = data.workouts || [];
+  state.exercises = data.exercises || [];
   state.journalItems = data.journalItems || [];
   state.journalMarks = data.journalMarks || [];
   state.journalDays = data.journalDays || [];
@@ -93,6 +97,8 @@ export async function signOut() {
   state.subscriptions = [];
   state.wishlist = [];
   state.places = [];
+  state.workouts = [];
+  state.exercises = [];
   state.journalItems = [];
   state.journalMarks = [];
   state.journalDays = [];
@@ -144,6 +150,24 @@ export function saveSubscription(s) {
 }
 export function removeSubscription(id) {
   return commit(() => { state.subscriptions = state.subscriptions.filter((s) => s.id !== id); }, () => adapter.removeSubscription(id));
+}
+
+export function saveWorkout(w) {
+  return commit(() => { state.workouts = withItem(state.workouts, w); }, () => adapter.saveWorkout(w));
+}
+// Deleting a workout deletes its exercises; journal routines linked to it stay, unlinked.
+export function removeWorkout(id) {
+  return commit(() => {
+    state.workouts = state.workouts.filter((w) => w.id !== id);
+    state.exercises = state.exercises.filter((e) => e.workoutId !== id);
+    state.journalItems = state.journalItems.map((i) => (i.workoutId === id ? { ...i, workoutId: null } : i));
+  }, () => adapter.removeWorkout(id));
+}
+export function saveExercise(e) {
+  return commit(() => { state.exercises = withItem(state.exercises, e); }, () => adapter.saveExercise(e));
+}
+export function removeExercise(id) {
+  return commit(() => { state.exercises = state.exercises.filter((e) => e.id !== id); }, () => adapter.removeExercise(id));
 }
 
 export function savePlace(p) {

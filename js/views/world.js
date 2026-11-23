@@ -1,9 +1,9 @@
 // World map: a scratch map. Countries start covered in foil; marking one as visited
 // "scratches" it off and shows its colour. Countries can also be marked "want to go".
-import { state, newId, savePlace, removePlace } from '../store.js?v=202611231442';
-import { icon } from '../icons.js?v=202611231442';
-import { esc, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231442';
-import { head, showError } from './sheets.js?v=202611231442';
+import { state, newId, savePlace, removePlace } from '../store.js?v=202611231455';
+import { icon } from '../icons.js?v=202611231455';
+import { esc, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231455';
+import { head, showError } from './sheets.js?v=202611231455';
 
 const CONTINENTS = {
   EU: { name: 'Europe', tone: 'pink' },

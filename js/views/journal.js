@@ -1,11 +1,11 @@
 // Journal: routines and one-off tasks spread over the week, a daily check-in,
 // and a gentle warning when a day holds more than feels comfortable.
 import { state, newId, itemsOn, markFor, dayEntry, daySummary, weekday,
-  saveJournalItem, removeJournalItem, saveJournalMark, removeJournalMark, saveJournalDay, saveJournalSettings } from '../store.js?v=202611231442';
-import { icon } from '../icons.js?v=202611231442';
-import { esc, iso, todayISO, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231442';
-import * as diary from './diary.js?v=202611231442';
-import { head, showError } from './sheets.js?v=202611231442';
+  saveJournalItem, removeJournalItem, saveJournalMark, removeJournalMark, saveJournalDay, saveJournalSettings } from '../store.js?v=202611231455';
+import { icon } from '../icons.js?v=202611231455';
+import { esc, iso, todayISO, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231455';
+import * as diary from './diary.js?v=202611231455';
+import { head, showError } from './sheets.js?v=202611231455';
 
 export const TYPES = [
   { id: 'cleaning', name: 'Cleaning', icon: 'sparkles', tone: 'sky' },
@@ -302,6 +302,12 @@ function renderRoutines() {
       ${journalNav('routines')}
     </header>
 
+    <a class="tile tone-pink tile-subs" href="#/workouts">
+      <span class="tile-icon">${icon('dumbbell', 22)}</span>
+      <span class="tile-subs-main"><span class="tile-label">Workouts</span><span class="tile-line">Build workouts with exercises, then add them to your week from there.</span></span>
+      <span class="tile-subs-go">${icon('chevron-right', 20)}</span>
+    </a>
+
     <section aria-labelledby="h-routines">
       <div class="section-row">
         <h2 class="section-title" id="h-routines">Routines</h2>
@@ -391,6 +397,7 @@ export function openItemActions(id, date) {
         <button type="button" class="btn btn-primary" data-do="done">${icon(done ? 'circle' : 'circle-check', 18)} ${done ? 'Mark not done' : 'Mark done'}</button>
         <button type="button" class="btn btn-quiet" data-do="move">${icon('arrow-right', 18)} Move to ${esc(relDay(next).toLowerCase() === 'tomorrow' ? 'tomorrow' : dayName(next))}</button>
         <button type="button" class="btn btn-quiet" data-do="skip">Skip ${date === todayISO() ? 'today' : 'this day'}</button>
+        ${item.workoutId && state.workouts.some((w) => w.id === item.workoutId) ? `<a class="btn btn-quiet" href="#/workouts/${item.workoutId}" data-do="open">${icon('dumbbell', 18)} Open workout</a>` : ''}
         <button type="button" class="btn btn-quiet" data-do="edit">${icon('pencil', 18)} Edit ${item.date ? 'task' : 'routine'}</button>
       </div>
     </div>`);
@@ -399,6 +406,7 @@ export function openItemActions(id, date) {
     const b = e.target.closest('[data-do]');
     if (!b) return;
     if (b.dataset.do === 'edit') { openItemSheet(id); return; }
+    if (b.dataset.do === 'open') { closeSheet(); return; }
     closeSheet();
     try {
       if (b.dataset.do === 'done') await toggleDone(id, date);

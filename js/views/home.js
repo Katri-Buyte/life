@@ -1,10 +1,11 @@
-import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231442';
-import { icon } from '../icons.js?v=202611231442';
-import { homeTile as worldTile } from './world.js?v=202611231442';
-import { homeTile as wishlistTile } from './wishlist.js?v=202611231442';
-import { homeTile as journalTile } from './journal.js?v=202611231442';
-import { homeTile as vaultTile } from './vault.js?v=202611231442';
-import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231442';
+import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231455';
+import { icon } from '../icons.js?v=202611231455';
+import { homeTile as workoutsTile } from './workouts.js?v=202611231455';
+import { homeTile as worldTile } from './world.js?v=202611231455';
+import { homeTile as wishlistTile } from './wishlist.js?v=202611231455';
+import { homeTile as journalTile } from './journal.js?v=202611231455';
+import { homeTile as vaultTile } from './vault.js?v=202611231455';
+import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231455';
 
 function greeting() {
   const h = new Date().getHours();
@@ -130,7 +131,7 @@ export function render() {
         <span class="tile-name">Recipes</span>
         <span class="tile-line">Your recipe book and meal plan</span>
       </a>
-      ${soonTile('pink', 'dumbbell', 'Workouts', 'Just Dance and walks')}
+      ${workoutsTile()}
       ${wishlistTile()}
       <a class="tile tone-sky tile-module" href="#/journal">
         <span class="tile-icon">${icon('notebook-pen', 22)}</span>
