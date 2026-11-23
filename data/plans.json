@@ -1,0 +1,1333 @@
+{
+  "targets": {
+    "calories": 1600,
+    "protein": 120,
+    "carbs": 160,
+    "fat": 53
+  },
+  "note": "Built on your dietitian’s weekly template, with a few recipes swapped in. Meat and fish weights are raw; mash, potato, rice and orzo are cooked. Salads follow your preferences: olive oil and balsamic only, 1 tbsp where the day has room and 1 tsp where it is tight. Water as much as you like, coffee with minimal sugar, no soft drinks.",
+  "foods": {
+    "greek-yogurt-2": {
+      "name": "Greek yogurt 2%",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 73,
+        "protein": 10,
+        "carbs": 3,
+        "fat": 2,
+        "fiber": 0
+      }
+    },
+    "oats": {
+      "name": "rolled oats",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 379,
+        "protein": 13,
+        "carbs": 68,
+        "fat": 6.5,
+        "fiber": 10
+      }
+    },
+    "strawberries": {
+      "name": "strawberries",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 32,
+        "protein": 0.7,
+        "carbs": 7.7,
+        "fat": 0.3,
+        "fiber": 2
+      }
+    },
+    "egg": {
+      "name": "boiled egg",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 72,
+        "protein": 6.3,
+        "carbs": 0.4,
+        "fat": 4.8,
+        "fiber": 0
+      }
+    },
+    "toast": {
+      "name": "wholegrain toast bread",
+      "unit": "slice",
+      "per": 1,
+      "macros": {
+        "calories": 65,
+        "protein": 2.5,
+        "carbs": 11,
+        "fat": 1,
+        "fiber": 1.8
+      }
+    },
+    "avocado": {
+      "name": "avocado",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 160,
+        "protein": 2,
+        "carbs": 8.5,
+        "fat": 14.7,
+        "fiber": 6.7
+      }
+    },
+    "almonds": {
+      "name": "almonds",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 579,
+        "protein": 21,
+        "carbs": 21.6,
+        "fat": 50,
+        "fiber": 12.5
+      }
+    },
+    "walnuts": {
+      "name": "walnuts",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 654,
+        "protein": 15,
+        "carbs": 14,
+        "fat": 65,
+        "fiber": 6.7
+      }
+    },
+    "apple": {
+      "name": "apple",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 94,
+        "protein": 0.5,
+        "carbs": 25,
+        "fat": 0.3,
+        "fiber": 4.4
+      }
+    },
+    "kiwi": {
+      "name": "kiwi",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 42,
+        "protein": 0.8,
+        "carbs": 10,
+        "fat": 0.4,
+        "fiber": 2.1
+      }
+    },
+    "pear": {
+      "name": "pear",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 100,
+        "protein": 0.6,
+        "carbs": 27,
+        "fat": 0.2,
+        "fiber": 5.5
+      }
+    },
+    "banana": {
+      "name": "banana",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 107,
+        "protein": 1.3,
+        "carbs": 27,
+        "fat": 0.4,
+        "fiber": 3.1
+      }
+    },
+    "protein-pudding": {
+      "name": "protein pudding",
+      "unit": "pot",
+      "per": 1,
+      "macros": {
+        "calories": 150,
+        "protein": 20,
+        "carbs": 12,
+        "fat": 3,
+        "fiber": 0
+      }
+    },
+    "jelly": {
+      "name": "sugar-free fruit jelly",
+      "unit": "pot",
+      "per": 1,
+      "macros": {
+        "calories": 10,
+        "protein": 1.2,
+        "carbs": 0.5,
+        "fat": 0,
+        "fiber": 0
+      }
+    },
+    "feta-light": {
+      "name": "light feta",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 175,
+        "protein": 20,
+        "carbs": 1,
+        "fat": 10,
+        "fiber": 0
+      }
+    },
+    "cottage-light": {
+      "name": "light cottage cheese",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 72,
+        "protein": 12.4,
+        "carbs": 2.7,
+        "fat": 1,
+        "fiber": 0
+      }
+    },
+    "beef-steak": {
+      "name": "lean beef steak",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 150,
+        "protein": 22,
+        "carbs": 0,
+        "fat": 7,
+        "fiber": 0
+      }
+    },
+    "beef-patty": {
+      "name": "lean beef patty (5% mince)",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 140,
+        "protein": 20,
+        "carbs": 3,
+        "fat": 5,
+        "fiber": 0.3
+      }
+    },
+    "white-fish": {
+      "name": "white fish fillet (cod, hake, sea bream)",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 90,
+        "protein": 18,
+        "carbs": 0,
+        "fat": 1.5,
+        "fiber": 0
+      }
+    },
+    "chicken-breast": {
+      "name": "chicken breast",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 110,
+        "protein": 23,
+        "carbs": 0,
+        "fat": 1.5,
+        "fiber": 0
+      }
+    },
+    "turkey": {
+      "name": "turkey breast slices",
+      "unit": "slice",
+      "per": 1,
+      "macros": {
+        "calories": 20,
+        "protein": 4,
+        "carbs": 0.5,
+        "fat": 0.3,
+        "fiber": 0
+      }
+    },
+    "mushrooms": {
+      "name": "mushrooms",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 22,
+        "protein": 3,
+        "carbs": 3.3,
+        "fat": 0.3,
+        "fiber": 1
+      }
+    },
+    "tortilla": {
+      "name": "wholegrain tortilla",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 180,
+        "protein": 5.4,
+        "carbs": 29,
+        "fat": 4.5,
+        "fiber": 3.6
+      }
+    },
+    "paximadi": {
+      "name": "small wholegrain rusk (paximadi)",
+      "unit": "piece",
+      "per": 1,
+      "macros": {
+        "calories": 35,
+        "protein": 1.1,
+        "carbs": 6.5,
+        "fat": 0.4,
+        "fiber": 1
+      }
+    },
+    "mash": {
+      "name": "mashed potato with a little milk",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 85,
+        "protein": 2,
+        "carbs": 17,
+        "fat": 1,
+        "fiber": 1.5
+      }
+    },
+    "potato": {
+      "name": "baked or boiled potato",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 87,
+        "protein": 2,
+        "carbs": 20,
+        "fat": 0.1,
+        "fiber": 1.8
+      }
+    },
+    "brown-rice": {
+      "name": "brown rice, cooked",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 123,
+        "protein": 2.7,
+        "carbs": 25.6,
+        "fat": 1,
+        "fiber": 1.6
+      }
+    },
+    "orzo": {
+      "name": "orzo (kritharaki), cooked",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 155,
+        "protein": 5.7,
+        "carbs": 31,
+        "fat": 0.9,
+        "fiber": 1.8
+      }
+    },
+    "greens": {
+      "name": "lettuce or lamb’s lettuce",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 16,
+        "protein": 1.4,
+        "carbs": 2.9,
+        "fat": 0.2,
+        "fiber": 1.5
+      }
+    },
+    "cucumber-pepper": {
+      "name": "cucumber and pepper",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 20,
+        "protein": 0.8,
+        "carbs": 4,
+        "fat": 0.2,
+        "fiber": 1.2
+      }
+    },
+    "broccoli": {
+      "name": "broccoli",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 35,
+        "protein": 2.4,
+        "carbs": 7.2,
+        "fat": 0.4,
+        "fiber": 3.3
+      }
+    },
+    "roast-veg": {
+      "name": "carrots, courgette and peppers",
+      "unit": "g",
+      "per": 100,
+      "macros": {
+        "calories": 29,
+        "protein": 1,
+        "carbs": 6,
+        "fat": 0.2,
+        "fiber": 1.9
+      }
+    },
+    "dressing": {
+      "name": "1 tbsp olive oil with balsamic",
+      "unit": "serving",
+      "per": 1,
+      "macros": {
+        "calories": 124,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 13.5,
+        "fiber": 0
+      }
+    },
+    "dressing-light": {
+      "name": "1 tsp olive oil with balsamic",
+      "unit": "serving",
+      "per": 1,
+      "macros": {
+        "calories": 45,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 4.5,
+        "fiber": 0
+      }
+    }
+  },
+  "weeks": [
+    {
+      "start": "2026-11-23",
+      "days": [
+        {
+          "date": "2026-11-23",
+          "prep": "Main prep, about 1 hour with the Speedi running alongside: air fry 400 g chicken breast for Tue and Wed, make the chicken courgette patties (8), cook 300 g brown rice and 150 g orzo (cooked weight), boil 6 eggs. Tonight: pan-grill the steak (10 min).",
+          "meals": {
+            "breakfast": [
+              {
+                "group": "Eggs and toast",
+                "items": [
+                  {
+                    "food": "egg",
+                    "amount": 3,
+                    "label": "3 boiled eggs"
+                  },
+                  {
+                    "food": "toast",
+                    "amount": 2,
+                    "label": "2 slices wholegrain toast"
+                  }
+                ]
+              }
+            ],
+            "snacks": [
+              {
+                "food": "apple",
+                "amount": 1,
+                "label": "1 green apple"
+              },
+              {
+                "food": "almonds",
+                "amount": 6,
+                "label": "5 almonds"
+              },
+              {
+                "food": "almonds",
+                "amount": 18,
+                "label": "15 almonds"
+              },
+              {
+                "food": "protein-pudding",
+                "amount": 1,
+                "label": "1 protein pudding"
+              }
+            ],
+            "lunch": [
+              {
+                "food": "beef-steak",
+                "amount": 190,
+                "label": "190 g lean beef steak, grilled"
+              },
+              {
+                "food": "mash",
+                "amount": 100,
+                "label": "100 g mash"
+              },
+              {
+                "group": "Green salad",
+                "items": [
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  }
+                ]
+              }
+            ],
+            "dinner": [
+              {
+                "food": "white-fish",
+                "amount": 160,
+                "label": "160 g white fish, baked or air fried"
+              },
+              {
+                "food": "potato",
+                "amount": 150,
+                "label": "150 g baked potato"
+              },
+              {
+                "food": "broccoli",
+                "amount": 200,
+                "label": "200 g steamed broccoli, drizzle of balsamic"
+              }
+            ]
+          }
+        },
+        {
+          "date": "2026-11-24",
+          "prep": "Cook a half batch of fakes this evening (250 g lentils, about 50 min, mostly hands-off) for Wednesday and Friday lunch; freeze what is left.",
+          "meals": {
+            "breakfast": [
+              {
+                "group": "Yogurt bowl",
+                "items": [
+                  {
+                    "food": "greek-yogurt-2",
+                    "amount": 200,
+                    "label": "200 g Greek yogurt 2%"
+                  },
+                  {
+                    "food": "oats",
+                    "amount": 45,
+                    "label": "6 tbsp oats (about 45 g)"
+                  },
+                  {
+                    "food": "banana",
+                    "amount": 0.5,
+                    "label": "½ banana"
+                  },
+                  {
+                    "food": "strawberries",
+                    "amount": 0,
+                    "label": "cinnamon"
+                  }
+                ],
+                "recipe": "greek-yogurt-bowl"
+              }
+            ],
+            "snacks": [
+              {
+                "food": "strawberries",
+                "amount": 70,
+                "label": "4 to 5 strawberries"
+              },
+              {
+                "food": "almonds",
+                "amount": 6,
+                "label": "5 almonds"
+              },
+              {
+                "food": "jelly",
+                "amount": 1,
+                "label": "1 sugar-free fruit jelly"
+              },
+              {
+                "food": "greek-yogurt-2",
+                "amount": 170,
+                "label": "1 pot Greek yogurt 2% (170 g)"
+              }
+            ],
+            "lunch": [
+              {
+                "recipe": "chicken-courgette-patties",
+                "portion": 1
+              },
+              {
+                "food": "orzo",
+                "amount": 140,
+                "label": "140 g orzo"
+              },
+              {
+                "group": "Green salad",
+                "items": [
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  }
+                ]
+              }
+            ],
+            "dinner": [
+              {
+                "food": "chicken-breast",
+                "amount": 160,
+                "label": "160 g chicken breast (from Monday)"
+              },
+              {
+                "food": "brown-rice",
+                "amount": 100,
+                "label": "100 g brown rice"
+              },
+              {
+                "food": "broccoli",
+                "amount": 200,
+                "label": "200 g steamed broccoli, drizzle of balsamic"
+              }
+            ]
+          }
+        },
+        {
+          "date": "2026-11-25",
+          "prep": "",
+          "meals": {
+            "breakfast": [
+              {
+                "group": "Breakfast wrap",
+                "items": [
+                  {
+                    "food": "tortilla",
+                    "amount": 1,
+                    "label": "1 wholegrain tortilla"
+                  },
+                  {
+                    "food": "turkey",
+                    "amount": 2,
+                    "label": "2 slices turkey"
+                  },
+                  {
+                    "food": "avocado",
+                    "amount": 75,
+                    "label": "½ avocado"
+                  },
+                  {
+                    "food": "cucumber-pepper",
+                    "amount": 80,
+                    "label": "cucumber and pepper"
+                  }
+                ]
+              }
+            ],
+            "snacks": [
+              {
+                "food": "walnuts",
+                "amount": 10,
+                "label": "10 g walnuts (about 3 halves)"
+              },
+              {
+                "food": "greek-yogurt-2",
+                "amount": 170,
+                "label": "1 pot Greek yogurt 2% (170 g)"
+              }
+            ],
+            "lunch": [
+              {
+                "recipe": "fakes-lentil-soup",
+                "portion": 0.6
+              },
+              {
+                "food": "toast",
+                "amount": 1,
+                "label": "1 slice wholegrain toast"
+              },
+              {
+                "food": "feta-light",
+                "amount": 40,
+                "label": "40 g light feta"
+              },
+              {
+                "food": "greens",
+                "amount": 100,
+                "label": "100 g lettuce or lamb’s lettuce, drizzle of balsamic"
+              }
+            ],
+            "dinner": [
+              {
+                "group": "Chicken salad",
+                "items": [
+                  {
+                    "food": "chicken-breast",
+                    "amount": 200,
+                    "label": "200 g chicken breast (from Monday)"
+                  },
+                  {
+                    "food": "cottage-light",
+                    "amount": 50,
+                    "label": "50 g light cottage cheese"
+                  },
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "cucumber-pepper",
+                    "amount": 120,
+                    "label": "cucumber and pepper"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  },
+                  {
+                    "food": "paximadi",
+                    "amount": 4,
+                    "label": "4 small wholegrain rusks"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "date": "2026-11-26",
+          "prep": "Air fry 400 g chicken breast for Friday and Sunday, and the beef patty for tonight (12 min). Fish instead of beef works too.",
+          "meals": {
+            "breakfast": [
+              {
+                "group": "Eggs and toast",
+                "items": [
+                  {
+                    "food": "egg",
+                    "amount": 3,
+                    "label": "3 boiled eggs"
+                  },
+                  {
+                    "food": "toast",
+                    "amount": 2,
+                    "label": "2 slices wholegrain toast"
+                  }
+                ]
+              }
+            ],
+            "snacks": [
+              {
+                "food": "kiwi",
+                "amount": 1,
+                "label": "1 kiwi"
+              },
+              {
+                "food": "almonds",
+                "amount": 6,
+                "label": "5 almonds"
+              }
+            ],
+            "lunch": [
+              {
+                "recipe": "chicken-courgette-patties",
+                "portion": 1
+              },
+              {
+                "food": "potato",
+                "amount": 150,
+                "label": "150 g baked potato"
+              },
+              {
+                "group": "Roasted vegetables",
+                "items": [
+                  {
+                    "food": "roast-veg",
+                    "amount": 250,
+                    "label": "250 g carrots, courgette and peppers"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "roasted with 1 tsp olive oil"
+                  }
+                ]
+              }
+            ],
+            "dinner": [
+              {
+                "food": "beef-patty",
+                "amount": 160,
+                "label": "160 g lean beef patties, air fried"
+              },
+              {
+                "food": "potato",
+                "amount": 150,
+                "label": "150 g baked potato"
+              },
+              {
+                "food": "greens",
+                "amount": 100,
+                "label": "100 g lettuce or lamb’s lettuce, drizzle of balsamic"
+              },
+              {
+                "food": "protein-pudding",
+                "amount": 1,
+                "label": "1 protein pudding"
+              }
+            ]
+          }
+        },
+        {
+          "date": "2026-11-27",
+          "prep": "",
+          "meals": {
+            "breakfast": [
+              {
+                "group": "Breakfast wrap",
+                "items": [
+                  {
+                    "food": "tortilla",
+                    "amount": 1,
+                    "label": "1 wholegrain tortilla"
+                  },
+                  {
+                    "food": "mushrooms",
+                    "amount": 100,
+                    "label": "100 g mushrooms, cooked without oil"
+                  },
+                  {
+                    "food": "avocado",
+                    "amount": 75,
+                    "label": "½ avocado"
+                  },
+                  {
+                    "food": "cucumber-pepper",
+                    "amount": 80,
+                    "label": "cucumber and pepper"
+                  }
+                ]
+              }
+            ],
+            "snacks": [
+              {
+                "food": "walnuts",
+                "amount": 10,
+                "label": "10 g walnuts (about 3 halves)"
+              },
+              {
+                "food": "greek-yogurt-2",
+                "amount": 170,
+                "label": "1 pot Greek yogurt 2% (170 g)"
+              }
+            ],
+            "lunch": [
+              {
+                "recipe": "fakes-lentil-soup",
+                "portion": 0.6
+              },
+              {
+                "food": "toast",
+                "amount": 1,
+                "label": "1 slice wholegrain toast"
+              },
+              {
+                "food": "feta-light",
+                "amount": 40,
+                "label": "40 g light feta"
+              },
+              {
+                "food": "greens",
+                "amount": 100,
+                "label": "100 g lettuce or lamb’s lettuce, drizzle of balsamic"
+              }
+            ],
+            "dinner": [
+              {
+                "group": "Chicken salad",
+                "items": [
+                  {
+                    "food": "chicken-breast",
+                    "amount": 200,
+                    "label": "200 g chicken breast (from Thursday)"
+                  },
+                  {
+                    "food": "cottage-light",
+                    "amount": 50,
+                    "label": "50 g light cottage cheese"
+                  },
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "cucumber-pepper",
+                    "amount": 120,
+                    "label": "cucumber and pepper"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  },
+                  {
+                    "food": "paximadi",
+                    "amount": 4,
+                    "label": "4 small wholegrain rusks"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "date": "2026-11-28",
+          "prep": "Make the carbonara pasta bake (10 minutes of work, 45 in the oven): one portion tonight, one for Sunday lunch, freeze the other two.",
+          "meals": {
+            "breakfast": [
+              {
+                "group": "Yogurt bowl",
+                "items": [
+                  {
+                    "food": "greek-yogurt-2",
+                    "amount": 200,
+                    "label": "200 g Greek yogurt 2%"
+                  },
+                  {
+                    "food": "oats",
+                    "amount": 45,
+                    "label": "6 tbsp oats (about 45 g)"
+                  },
+                  {
+                    "food": "banana",
+                    "amount": 0.5,
+                    "label": "½ banana"
+                  },
+                  {
+                    "food": "strawberries",
+                    "amount": 0,
+                    "label": "cinnamon"
+                  }
+                ],
+                "recipe": "greek-yogurt-bowl"
+              }
+            ],
+            "snacks": [
+              {
+                "food": "strawberries",
+                "amount": 70,
+                "label": "4 to 5 strawberries"
+              },
+              {
+                "food": "almonds",
+                "amount": 6,
+                "label": "5 almonds"
+              },
+              {
+                "food": "jelly",
+                "amount": 1,
+                "label": "1 sugar-free fruit jelly"
+              }
+            ],
+            "lunch": [
+              {
+                "recipe": "chicken-courgette-patties",
+                "portion": 1
+              },
+              {
+                "food": "brown-rice",
+                "amount": 150,
+                "label": "150 g brown rice"
+              },
+              {
+                "group": "Green salad",
+                "items": [
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  }
+                ]
+              }
+            ],
+            "dinner": [
+              {
+                "recipe": "carbonara-pasta-bake",
+                "portion": 1
+              },
+              {
+                "food": "broccoli",
+                "amount": 200,
+                "label": "200 g steamed broccoli, drizzle of balsamic"
+              }
+            ]
+          }
+        },
+        {
+          "date": "2026-11-29",
+          "prep": "Free breakfast: pancakes, made fresh.",
+          "meals": {
+            "breakfast": [
+              {
+                "recipe": "protein-pancakes-banana",
+                "portion": 1
+              }
+            ],
+            "snacks": [
+              {
+                "food": "apple",
+                "amount": 1,
+                "label": "1 green apple"
+              },
+              {
+                "food": "pear",
+                "amount": 1,
+                "label": "1 pear"
+              }
+            ],
+            "lunch": [
+              {
+                "recipe": "carbonara-pasta-bake",
+                "portion": 1
+              },
+              {
+                "group": "Green salad",
+                "items": [
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  }
+                ]
+              }
+            ],
+            "dinner": [
+              {
+                "group": "Chicken salad",
+                "items": [
+                  {
+                    "food": "chicken-breast",
+                    "amount": 160,
+                    "label": "160 g chicken breast (from Thursday)"
+                  },
+                  {
+                    "food": "cottage-light",
+                    "amount": 50,
+                    "label": "50 g light cottage cheese"
+                  },
+                  {
+                    "food": "greens",
+                    "amount": 100,
+                    "label": "100 g lettuce or lamb’s lettuce"
+                  },
+                  {
+                    "food": "cucumber-pepper",
+                    "amount": 120,
+                    "label": "cucumber and pepper"
+                  },
+                  {
+                    "food": "dressing-light",
+                    "amount": 1,
+                    "label": "1 tsp olive oil, drizzle of balsamic"
+                  },
+                  {
+                    "food": "paximadi",
+                    "amount": 4,
+                    "label": "4 small wholegrain rusks"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "shopping": [
+        {
+          "section": "Meat, fish and eggs",
+          "items": [
+            {
+              "name": "Chicken breast fillets",
+              "qty": "1.2 kg",
+              "note": "800 g plain, 400 g for the carbonara"
+            },
+            {
+              "name": "Chicken mince",
+              "qty": "400 g",
+              "note": "for the patties"
+            },
+            {
+              "name": "Lean beef steak",
+              "qty": "1 of about 190 g"
+            },
+            {
+              "name": "Lean beef mince (5%)",
+              "qty": "about 200 g",
+              "note": "one patty"
+            },
+            {
+              "name": "White fish fillet",
+              "qty": "about 160 g",
+              "note": "cod, hake or sea bream"
+            },
+            {
+              "name": "Lean bacon",
+              "qty": "120 g",
+              "note": "carbonara"
+            },
+            {
+              "name": "Turkey breast slices",
+              "qty": "1 small pack"
+            },
+            {
+              "name": "Eggs",
+              "qty": "15"
+            }
+          ]
+        },
+        {
+          "section": "Dairy",
+          "items": [
+            {
+              "name": "Greek yogurt 2%",
+              "qty": "about 1.2 kg",
+              "note": "e.g. a 1 kg tub plus a 200 g pot; high-protein yogurt is best for the carbonara"
+            },
+            {
+              "name": "Light cottage cheese",
+              "qty": "1 tub (225 g)"
+            },
+            {
+              "name": "Light feta",
+              "qty": "1 small pack (about 200 g)"
+            },
+            {
+              "name": "Light cream cheese",
+              "qty": "1 pack (200 g)",
+              "note": "carbonara"
+            },
+            {
+              "name": "Mozzarella, grated",
+              "qty": "80 g",
+              "note": "patties"
+            },
+            {
+              "name": "Parmesan",
+              "qty": "about 90 g"
+            },
+            {
+              "name": "Milk",
+              "qty": "a little",
+              "note": "mash and pancakes"
+            },
+            {
+              "name": "Protein puddings",
+              "qty": "2"
+            },
+            {
+              "name": "Sugar-free fruit jellies",
+              "qty": "2"
+            }
+          ]
+        },
+        {
+          "section": "Bread, grains and legumes",
+          "items": [
+            {
+              "name": "Wholegrain toast bread",
+              "qty": "1 pack",
+              "note": "6 slices this week"
+            },
+            {
+              "name": "Wholegrain tortillas",
+              "qty": "2"
+            },
+            {
+              "name": "Small wholegrain rusks (paximadia)",
+              "qty": "12"
+            },
+            {
+              "name": "Brown rice",
+              "qty": "1 pack",
+              "note": "about 100 g dry"
+            },
+            {
+              "name": "Orzo (kritharaki)",
+              "qty": "1 pack",
+              "note": "about 60 g dry"
+            },
+            {
+              "name": "Protein penne",
+              "qty": "160 g",
+              "note": "e.g. Barilla Protein+"
+            },
+            {
+              "name": "Rolled oats",
+              "qty": "about 170 g"
+            },
+            {
+              "name": "Small brown lentils",
+              "qty": "250 g",
+              "note": "half batch of fakes"
+            }
+          ]
+        },
+        {
+          "section": "Vegetables",
+          "items": [
+            {
+              "name": "Lettuce and lamb’s lettuce",
+              "qty": "about 1 kg",
+              "note": "10 salads; e.g. 2 lettuces and 2 bags of lamb’s lettuce"
+            },
+            {
+              "name": "Broccoli",
+              "qty": "2 heads (about 600 g)"
+            },
+            {
+              "name": "Potatoes",
+              "qty": "about 700 g"
+            },
+            {
+              "name": "Courgettes",
+              "qty": "3"
+            },
+            {
+              "name": "Peppers",
+              "qty": "3"
+            },
+            {
+              "name": "Cucumbers",
+              "qty": "2"
+            },
+            {
+              "name": "Carrots",
+              "qty": "2"
+            },
+            {
+              "name": "Mushrooms",
+              "qty": "1 pack (250 g)"
+            },
+            {
+              "name": "Avocado",
+              "qty": "1"
+            },
+            {
+              "name": "Onion",
+              "qty": "1"
+            },
+            {
+              "name": "Small leek",
+              "qty": "1"
+            },
+            {
+              "name": "Garlic",
+              "qty": "1 bulb"
+            },
+            {
+              "name": "Tomato",
+              "qty": "1",
+              "note": "for the fakes"
+            },
+            {
+              "name": "Fresh thyme",
+              "qty": "1 small bunch",
+              "note": "or use dried"
+            }
+          ]
+        },
+        {
+          "section": "Fruit and nuts",
+          "items": [
+            {
+              "name": "Green apples",
+              "qty": "2"
+            },
+            {
+              "name": "Bananas",
+              "qty": "3"
+            },
+            {
+              "name": "Kiwi",
+              "qty": "1"
+            },
+            {
+              "name": "Pear",
+              "qty": "1"
+            },
+            {
+              "name": "Strawberries",
+              "qty": "1 small punnet"
+            },
+            {
+              "name": "Unsalted almonds",
+              "qty": "about 50 g"
+            },
+            {
+              "name": "Walnuts",
+              "qty": "about 20 g"
+            }
+          ]
+        },
+        {
+          "section": "Check the cupboard",
+          "items": [
+            {
+              "name": "Olive oil and balsamic"
+            },
+            {
+              "name": "Chicken stock",
+              "qty": "240 ml"
+            },
+            {
+              "name": "Tomato paste"
+            },
+            {
+              "name": "Protein powder",
+              "qty": "for the pancakes"
+            },
+            {
+              "name": "Baking powder"
+            },
+            {
+              "name": "Plain flour",
+              "qty": "2 tbsp"
+            },
+            {
+              "name": "Cinnamon, bay leaves, oregano"
+            },
+            {
+              "name": "Salt and pepper"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
