@@ -1,4 +1,4 @@
-import { monthSummary, categoriesOf, vaultSummary } from '../store.js';
+import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js';
 import { icon } from '../icons.js';
 import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js';
 import { txnRow } from './home.js';
@@ -7,7 +7,51 @@ import * as vault from './vault.js';
 let month = monthOf(todayISO());
 
 export function shift(by) { month = shiftMonth(month, by); }
+export function setMonth(m) { month = m; }
 export const currentMonth = () => month;
+
+const shortMonth = (mm) => fromISO(mm + '-01').toLocaleDateString('en-GB', { month: 'short' });
+const signed = (cents) => (cents < 0 ? '−' : '') + money(Math.abs(cents));
+
+function historyPanel() {
+  const rows = monthHistory(monthOf(todayISO()));
+  const chartMonths = rows.slice(0, 12).reverse(); // oldest first, last 12 months
+  const max = Math.max(1, ...chartMonths.flatMap((r) => [r.income, r.spent]));
+  const withData = rows.filter((r) => r.income || r.spent || r.saved);
+  const over = withData.filter((r) => r.spent > r.income).length;
+  const avg = withData.length ? Math.round(withData.reduce((n, r) => n + r.spent, 0) / withData.length) : 0;
+  const takeaway = !withData.length ? 'Your months will collect here as you add transactions.'
+    : withData.length === 1 ? `One month so far: ${money(withData[0].spent)} spent of ${money(withData[0].income)} income.`
+    : `You spend ${money(avg)} a month on average, and spent more than you earned in ${over} of ${withData.length} months.`;
+
+  const bar = (v, cls) => `<span class="hbar ${cls}" style="height:${v ? Math.max(3, Math.round((v / max) * 100)) : 0}%"></span>`;
+
+  return `
+    <section class="panel" aria-labelledby="h-history">
+      <h2 id="h-history">Monthly history <small>last ${chartMonths.length === 1 ? 'month' : `${chartMonths.length} months`}</small></h2>
+      <p class="takeaway">${takeaway}</p>
+      <div class="legend" aria-hidden="true"><span><i class="hbar income"></i>Income</span><span><i class="hbar spent"></i>Spent</span></div>
+      <div class="hchart" role="img" aria-label="Bar chart of income and spending per month. ${takeaway}">
+        ${chartMonths.map((r) => `
+          <button type="button" class="hcol${r.month === month ? ' is-current' : ''}" data-action="go-month" data-month="${r.month}" aria-label="Show ${monthLabel(r.month)}">
+            <span class="hbars">${bar(r.income, 'income')}${bar(r.spent, 'spent')}</span>
+            <span class="hlabel">${shortMonth(r.month)}</span>
+          </button>`).join('')}
+      </div>
+      <div class="table-wrap">
+        <table class="history">
+          <thead><tr><th scope="col">Month</th><th scope="col">Income</th><th scope="col">Spent</th><th scope="col">Saved</th><th scope="col">Left</th></tr></thead>
+          <tbody>
+            ${rows.map((r) => `
+              <tr${r.month === month ? ' class="is-current"' : ''}>
+                <th scope="row"><button type="button" class="link" data-action="go-month" data-month="${r.month}" aria-label="Show ${monthLabel(r.month)}">${shortMonth(r.month)} ${r.month.slice(0, 4)}</button></th>
+                <td data-label="Income">${money(r.income)}</td><td data-label="Spent">${money(r.spent)}</td><td data-label="Saved">${signed(r.saved)}</td><td data-label="Left" class="${r.left < 0 ? 'neg' : ''}">${signed(r.left)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
 
 function dayChart(m) {
   const days = new Date(fromISO(month + '-01').getFullYear(), fromISO(month + '-01').getMonth() + 1, 0).getDate();
@@ -134,5 +178,7 @@ export function render() {
     <section class="panel" aria-labelledby="h-txns">
       <h2 id="h-txns">Transactions <small>${monthLabel(month)}</small></h2>
       ${transactionList(m.txns)}
-    </section>`;
+    </section>
+
+    ${historyPanel()}`;
 }

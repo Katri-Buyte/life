@@ -148,3 +148,15 @@ export function vaultSummary(month) {
   const { goal, salary } = state.vault;
   return { entries, saved, goal, salary, balance: vaultBalance(), toGo: Math.max(0, goal - saved), reached: goal > 0 && saved >= goal };
 }
+
+// Every month with any income, spending or savings, newest first, plus the current month.
+export function monthHistory(current) {
+  const months = new Set([current]);
+  state.transactions.forEach((t) => months.add(t.date.slice(0, 7)));
+  state.vaultEntries.forEach((e) => months.add(e.date.slice(0, 7)));
+  return [...months].sort().reverse().map((month) => {
+    const m = monthSummary(month);
+    const saved = vaultSummary(month).saved;
+    return { month, income: m.income, spent: m.spent, saved, left: m.income - m.spent - saved };
+  });
+}

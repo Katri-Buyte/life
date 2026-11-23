@@ -70,6 +70,7 @@ const actions = {
   'vault-take': () => openVaultEntrySheet(null, 'out'),
   'vault-edit': (el) => openVaultEntrySheet(el.dataset.id),
   'vault-settings': () => openVaultSettingsSheet(),
+  'go-month': (el) => { budget.setMonth(el.dataset.month); render(); window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); },
   'month-prev': () => { budget.shift(-1); render(); },
   'month-next': () => { budget.shift(1); render(); },
   'recipes-retry': () => retryRecipes(),
