@@ -1,19 +1,24 @@
 # Life: build guide for a Claude agent
 
-This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
+This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a journal of routines and check-ins, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
 
 Read the whole guide before starting. Steps marked **(person)** need the person themself: creating accounts, choosing passwords and signing in. Never type a password for them and never ask them to paste one to you.
 
 
 ## 1. What the app does
 
-- **Home**: a bento grid of pastel cards with this month's spending, today and this week, latest transactions, top category, income, the savings vault, and tiles for each part of life.
+- **Home**: a bento grid of pastel cards with today's journal (what is done and what is next), this month's spending, today and this week, latest transactions, top category, income, the savings vault, and tiles for each part of life.
 - **Budget**
   - Month totals: "Left after spending and saving" (income minus spending minus money put into the vault), spent, income. If category limits are set, the first tile becomes "Left to spend".
   - Vault: savings total, "Add money" and "Take out", a monthly saving goal suggested from the salary (10, 15 or 20%, with 20% from the 50/30/20 rule of thumb), and an in-app reminder until the goal is met.
   - Spending by day chart (with "View as table"), category cards with optional monthly limits, the transaction list, and a Monthly history (chart plus table of income, spent, saved and left per month).
   - Subscriptions page: name, price, monthly or yearly, payment day, category. When a payment date passes it shows as Due with **Log** (adds the expense on its date) and **Skip**, both with Undo. An expense that month whose note contains the subscription's name counts as already paid. Known services show their logo.
   - Totals are per calendar month, so they start from zero on the 1st; the vault total carries over.
+- **Journal**, for staying on track without feeling overwhelmed
+  - Routines (weekly, on chosen weekdays) and one-off tasks, each with a type (cleaning, market run, workout, cooking, self-care, errand), a part of the day (morning, afternoon, evening, anytime) instead of an exact time, and minutes.
+  - Day view: a check-in (energy, mood, a private note) shown as "Today's vibe", a word for the day with a short meaning and a question, how full the day is against the person's comfortable number of minutes, and the list grouped by part of day with a tap to tick off.
+  - A plain notice when the day is over the comfortable amount or energy is low, and one-tap Move to tomorrow or Skip, with Undo. Moving a routine skips it that day and adds a one-off copy the next day.
+  - Week view with each day's load and energy, and a Routines page with starter ideas.
 - **Recipes**: recipe list with search and category filters, recipe pages with a servings stepper that rescales ingredients, macros per serving and Ninja Speedi settings, and a weekly meal plan with daily macro totals and a tickable shopping list.
 - **Settings**: where the data lives, sign out, and a JSON backup download.
 
@@ -27,12 +32,12 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
 ```
 index.html               app shell (nav, main view, sheet dialog, toast)
 css/styles.css           all styles: design tokens, bento tiles, sheets, charts
-js/app.js                router (#/home, #/budget, #/subscriptions, #/recipes, #/plan, #/settings) and click actions
+js/app.js                router (#/home, #/budget, #/subscriptions, #/journal, #/recipes, #/plan, #/settings) and click actions
 js/store.js              all data and calculations; screens read `state` and call its functions
 js/adapters/supabase.js  database reads and writes
 js/adapters/local.js     same interface, saved in the browser only
 js/config.js             Supabase URL and publishable key, recipe data location
-js/views/*.js            one file per screen (home, budget, vault, subscriptions, sheets, recipes, settings)
+js/views/*.js            one file per screen (home, budget, vault, subscriptions, journal, sheets, recipes, settings)
 js/icons.js              UI icons, generated from Lucide (ISC licence)
 js/brands.js             service logos, generated from Simple Icons (CC0)
 data/recipes.json        recipes and categories
@@ -43,9 +48,9 @@ serve.js                 local preview server: node serve.js  ->  http://localho
 tools/bump-version.js    run before publishing any change (see section 5)
 ```
 
-**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`. Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
+**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `journal_items`, `journal_marks` (done or skipped per day), `journal_days` (check-ins, one row per date) and `journal_settings` (comfortable minutes per day). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
 
-**Design system**: cream background, pastel tiles (butter, pink, sage, sky, lavender, peach) with dark text in both light and dark mode, black pill buttons, a dark bottom bar on phones with a pink plus button, and a sidebar on desktop. Fonts: Instrument Serif for headings, Plus Jakarta Sans for text. Built to Apple's Human Interface Guidelines translated to the web: visible labels and inline errors on every field, Undo instead of confirmation dialogs for reversible actions, every chart with a title, period, one-sentence takeaway and a table view, targets of 44 px on touch, and colour never the only signal.
+**Design system**: cream background, pastel tiles (butter, pink, sage, sky, lavender, peach) with dark text in both light and dark mode, black pill buttons, a dark bottom bar on phones with a pink plus button, and a sidebar on desktop. On phones the bar holds Home, Budget, the plus button, Journal and Recipes; Settings is the gear on Home. The plus button adds a transaction, or a journal item while in Journal. Fonts: Instrument Serif for headings, Plus Jakarta Sans for text. Built to Apple's Human Interface Guidelines translated to the web: visible labels and inline errors on every field, Undo instead of confirmation dialogs for reversible actions, every chart with a title, period, one-sentence takeaway and a table view, targets of 44 px on touch, and colour never the only signal.
 
 
 ## 3. Set up a copy for your person
@@ -110,8 +115,9 @@ The original was built in one long session, one module at a time, each tested in
 5. **Month total counts savings**: the owner pointed out that money put in the vault was not subtracted; the first tile became "Left after spending and saving".
 6. **Monthly history**, then **cache fix**: an update looked missing on the live site because browsers kept old copies of some files. Every file now carries one version number.
 7. **Subscriptions**, then **service logos**.
+8. **Journal**, so routines like cleaning, market runs and workouts are spread over the week with a check-in and a word for the day, and the app says when a day is too full.
 
-Planned but not built yet: phone notifications for the saving reminder (needs a service worker and a scheduled job), workouts, wishlist, schedule, and a world scratch map.
+Planned but not built yet: phone notifications for the saving reminder (needs a service worker and a scheduled job), a fuller workouts module, wishlist, and a world scratch map.
 
 
 ## 5. Rules for making changes

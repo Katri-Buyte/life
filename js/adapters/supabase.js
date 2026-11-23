@@ -12,6 +12,12 @@ const rowToEntry = (r) => ({ id: r.id, date: r.date, amount: r.amount_cents, not
 const subToRow = (s) => ({ id: s.id, name: s.name, amount_cents: s.amount, cycle: s.cycle, day: s.day, month: s.month, category_id: s.categoryId, handled_month: s.handled || '', created_at: s.createdAt });
 const rowToSub = (r) => ({ id: r.id, name: r.name, amount: r.amount_cents, cycle: r.cycle, day: r.day, month: r.month, categoryId: r.category_id, handled: r.handled_month || '', createdAt: r.created_at });
 
+const itemToRow = (i) => ({ id: i.id, title: i.title, type: i.type, days: i.days, date: i.date || null, part: i.part, minutes: i.minutes, created_at: i.createdAt });
+const rowToItem = (r) => ({ id: r.id, title: r.title, type: r.type, days: r.days || [], date: r.date, part: r.part, minutes: r.minutes, createdAt: r.created_at });
+const markToRow = (m) => ({ id: m.id, item_id: m.itemId, date: m.date, status: m.status });
+const rowToMark = (r) => ({ id: r.id, itemId: r.item_id, date: r.date, status: r.status });
+const rowToDay = (r) => ({ id: r.date, date: r.date, energy: r.energy || 0, mood: r.mood || '', note: r.note || '' });
+
 export async function create(url, key) {
   const sb = createClient(url, key);
 
@@ -48,6 +54,15 @@ export async function create(url, key) {
         sb.from('vault_settings').select('*').maybeSingle(),
         all('subscriptions', 'created_at'),
       ]);
+      // journal_days has no id column, so it is read on its own (one row per day, a few hundred a year).
+      const [items, marks, days, js] = await Promise.all([
+        all('journal_items', 'created_at'),
+        all('journal_marks', 'date'),
+        sb.from('journal_days').select('*').order('date').limit(5000),
+        sb.from('journal_settings').select('*').maybeSingle(),
+      ]);
+      if (days.error) throw days.error;
+      if (js.error) throw js.error;
       if (settings.error) throw settings.error;
       const s = settings.data;
       return {
@@ -56,6 +71,10 @@ export async function create(url, key) {
         vault: s ? { salary: s.salary_cents, goal: s.goal_cents, starting: s.starting_cents } : {},
         vaultEntries: entries.map(rowToEntry),
         subscriptions: subs.map(rowToSub),
+        journalItems: items.map(rowToItem),
+        journalMarks: marks.map(rowToMark),
+        journalDays: days.data.map(rowToDay),
+        journalSettings: js.data ? { capacity: js.data.capacity_minutes } : {},
       };
     },
     async saveCategory(c) { check(await sb.from('budget_categories').upsert(catToRow(c))); },
@@ -68,6 +87,17 @@ export async function create(url, key) {
     },
     async saveVaultEntry(e) { check(await sb.from('vault_entries').upsert(entryToRow(e))); },
     async removeVaultEntry(id) { check(await sb.from('vault_entries').delete().eq('id', id)); },
+    async saveJournalItem(i) { check(await sb.from('journal_items').upsert(itemToRow(i))); },
+    async removeJournalItem(id) { check(await sb.from('journal_items').delete().eq('id', id)); },
+    async saveJournalMark(m) { check(await sb.from('journal_marks').upsert(markToRow(m))); },
+    async removeJournalMark(id) { check(await sb.from('journal_marks').delete().eq('id', id)); },
+    async saveJournalDay(d) {
+      check(await sb.from('journal_days').upsert({ date: d.date, energy: d.energy || null, mood: d.mood, note: d.note }, { onConflict: 'user_id,date' }));
+    },
+    async saveJournalSettings(s) {
+      const { data } = await sb.auth.getSession();
+      check(await sb.from('journal_settings').upsert({ user_id: data.session.user.id, capacity_minutes: s.capacity }));
+    },
     async saveSubscription(s) { check(await sb.from('subscriptions').upsert(subToRow(s))); },
     async removeSubscription(id) { check(await sb.from('subscriptions').delete().eq('id', id)); },
   };

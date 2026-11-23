@@ -692,3 +692,64 @@ button.link { padding: 0; border: 0; background: none; font: inherit; font-weigh
 .row-sub.wrap { white-space: normal; }
 .bubble.brand { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 0 0 1px var(--line); }
 .bubble.monogram { font: 400 22px/1 var(--display); }
+
+/* ---------- Journal ---------- */
+
+.page-head-home { position: relative; }
+.settings-link { position: absolute; top: -6px; right: -6px; color: var(--ink); }
+@media (min-width: 900px) { .settings-link { display: none; } }
+@media (max-width: 899px) { .nav-settings { display: none; } }
+
+.month-row { flex-wrap: wrap; gap: 8px; align-items: center; }
+.tile-link { padding: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--on-tone-2); text-align: left; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 28px; }
+button.tile-checkin { text-align: left; }
+.vibe { margin-top: auto; font: 400 40px/1 var(--display); }
+.notice { gap: 6px; }
+.notice h2 { font-size: 22px; }
+
+.word-card { gap: 6px; }
+.word-card .tile-label { color: var(--ink-2); }
+.word { font: 400 46px/1 var(--display); letter-spacing: -0.01em; }
+.word-q { font-weight: 700; }
+
+.jpart + .jpart { margin-top: 6px; }
+.jpart .day { display: flex; align-items: center; gap: 6px; }
+.jrow { display: flex; align-items: center; gap: 4px; }
+.jrow .row { flex: 1; min-width: 0; }
+.jcheck { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border: 0; border-radius: 999px; background: none; color: var(--ink-2); }
+.jcheck[aria-pressed='true'] { color: var(--ink); }
+.jrow.is-done .row-title { text-decoration: line-through; color: var(--ink-2); }
+.jrow.is-done .bubble { opacity: 0.55; }
+.skipped summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ink-2); min-height: 32px; display: inline-flex; align-items: center; }
+.skip-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+.skip-row .row-title { color: var(--ink-2); }
+
+.action-list { display: grid; gap: 8px; }
+.action-list .btn { justify-self: stretch; justify-content: flex-start; }
+
+.week-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
+.week-grid li:first-child { grid-column: 1 / -1; }
+@media (min-width: 900px) { .week-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .week-grid li:first-child { grid-column: auto; } }
+.week-day { width: 100%; height: 100%; min-height: 150px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); gap: 6px; text-align: left; }
+.week-day::after { display: none; }
+.week-day .meter { background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.week-day .meter span { background: var(--ink); }
+.week-day .tile-line { color: var(--ink-2); }
+.week-day.is-today { border: 2px solid var(--ink); }
+.week-day.is-full .meter span { background: var(--danger); }
+.week-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.week-head .pill { background: var(--ink); color: var(--bg); }
+.week-items { display: grid; gap: 2px; font-size: 13px; }
+.week-items span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.segmented-4 { grid-template-columns: repeat(4, 1fr); border-radius: 18px; }
+.segmented-5 { grid-template-columns: repeat(5, 1fr); border-radius: 18px; }
+.segmented-4 span, .segmented-5 span { font-size: 13px; padding: 0 4px; text-align: center; border-radius: 14px; }
+.textarea { min-height: 110px; padding: 12px 14px; resize: vertical; line-height: 1.5; }
+
+.weekdays { display: flex; flex-wrap: wrap; gap: 8px; }
+.day-pill { position: relative; }
+.day-pill input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.day-pill span[aria-hidden] { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; background: var(--pink); color: var(--on-tone); font-size: 13px; font-weight: 700; }
+.day-pill input:checked + span { background: var(--ink); color: var(--bg); }
+.day-pill input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }

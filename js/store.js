@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231338';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231353';
 
 export const state = {
   ready: false,
@@ -10,6 +10,10 @@ export const state = {
   transactions: [],   // { id, date 'YYYY-MM-DD', amount (cents), kind, categoryId, note, createdAt }
   vault: { salary: 0, goal: 0, starting: 0 }, // cents: monthly salary, monthly saving goal, savings held before using the app
   vaultEntries: [],   // { id, date, amount (cents, negative = taken out), note, createdAt }
+  journalItems: [],   // { id, title, type, days [1-7, Mon = 1] for routines, date 'YYYY-MM-DD' for one-offs, part, minutes, createdAt }
+  journalMarks: [],   // { id, itemId, date, status 'done'|'skipped' }
+  journalDays: [],    // { id (= date), date, energy 1-5 or 0, mood, note }
+  journalSettings: { capacity: 120 }, // minutes that feel like a comfortable day
   subscriptions: [],  // { id, name, amount (cents), cycle 'monthly'|'yearly', day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
 };
 
@@ -40,12 +44,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231338');
+    const { create } = await import('./adapters/supabase.js?v=202611231353');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231338');
+    const { create } = await import('./adapters/local.js?v=202611231353');
     adapter = create();
   }
   await reload();
@@ -58,6 +62,10 @@ async function reload() {
   state.vault = { salary: 0, goal: 0, starting: 0, ...data.vault };
   state.vaultEntries = data.vaultEntries || [];
   state.subscriptions = data.subscriptions || [];
+  state.journalItems = data.journalItems || [];
+  state.journalMarks = data.journalMarks || [];
+  state.journalDays = data.journalDays || [];
+  state.journalSettings = { capacity: 120, ...data.journalSettings };
   if (!state.categories.length) {
     state.categories = DEFAULT_CATEGORIES.map(([name, kind, color, icon], sort) => ({ id: newId(), name, kind, color, icon, budget: 0, sort }));
     for (const c of state.categories) await adapter.saveCategory(c);
@@ -79,6 +87,10 @@ export async function signOut() {
   state.vault = { salary: 0, goal: 0, starting: 0 };
   state.vaultEntries = [];
   state.subscriptions = [];
+  state.journalItems = [];
+  state.journalMarks = [];
+  state.journalDays = [];
+  state.journalSettings = { capacity: 120 };
   emit();
 }
 
@@ -126,6 +138,29 @@ export function saveSubscription(s) {
 }
 export function removeSubscription(id) {
   return commit(() => { state.subscriptions = state.subscriptions.filter((s) => s.id !== id); }, () => adapter.removeSubscription(id));
+}
+
+export function saveJournalItem(i) {
+  return commit(() => { state.journalItems = withItem(state.journalItems, i); }, () => adapter.saveJournalItem(i));
+}
+export function removeJournalItem(id) {
+  return commit(() => {
+    state.journalItems = state.journalItems.filter((i) => i.id !== id);
+    state.journalMarks = state.journalMarks.filter((m) => m.itemId !== id); // the database removes them too
+  }, () => adapter.removeJournalItem(id));
+}
+export function saveJournalMark(m) {
+  return commit(() => { state.journalMarks = withItem(state.journalMarks, m); }, () => adapter.saveJournalMark(m));
+}
+export function removeJournalMark(id) {
+  return commit(() => { state.journalMarks = state.journalMarks.filter((m) => m.id !== id); }, () => adapter.removeJournalMark(id));
+}
+export function saveJournalDay(d) {
+  const day = { ...d, id: d.date };
+  return commit(() => { state.journalDays = withItem(state.journalDays, day); }, () => adapter.saveJournalDay(day));
+}
+export function saveJournalSettings(s) {
+  return commit(() => { state.journalSettings = s; }, () => adapter.saveJournalSettings(s));
 }
 
 // ---------- Reading helpers ----------
@@ -206,3 +241,26 @@ export function subscriptionStatus(s, today) {
 
 export const monthlyCost = (s) => (s.cycle === 'yearly' ? Math.round(s.amount / 12) : s.amount);
 export const yearlyCost = (s) => (s.cycle === 'yearly' ? s.amount : s.amount * 12);
+
+// ---------- Journal ----------
+
+// Monday = 1 ... Sunday = 7
+export const weekday = (date) => { const [y, m, d] = date.split('-').map(Number); return ((new Date(y, m - 1, d).getDay() + 6) % 7) + 1; };
+
+// Everything planned for a day: one-offs on that date, and routines on that weekday
+// (only from the day the routine was added, so the past is not rewritten).
+export function itemsOn(date) {
+  const wd = weekday(date);
+  return state.journalItems.filter((i) => (i.date ? i.date === date : i.days.includes(wd) && i.createdAt.slice(0, 10) <= date));
+}
+export const markFor = (itemId, date) => state.journalMarks.find((m) => m.itemId === itemId && m.date === date);
+export const dayEntry = (date) => state.journalDays.find((d) => d.date === date);
+
+export function daySummary(date) {
+  const items = itemsOn(date).map((item) => ({ item, mark: markFor(item.id, date) }));
+  const active = items.filter((x) => !x.mark || x.mark.status !== 'skipped');
+  const done = active.filter((x) => x.mark && x.mark.status === 'done');
+  const minutes = active.reduce((n, x) => n + (x.item.minutes || 0), 0);
+  const left = active.filter((x) => !x.mark).reduce((n, x) => n + (x.item.minutes || 0), 0);
+  return { items, active, done, minutes, left, capacity: state.journalSettings.capacity, entry: dayEntry(date) };
+}

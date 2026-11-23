@@ -113,3 +113,58 @@ create policy "own subscriptions" on public.subscriptions
 
 grant select, insert, update, delete on public.subscriptions to authenticated;
 revoke all on public.subscriptions from anon;
+
+-- Journal (added 2026-11-23): routines and one-off tasks, what was done or
+-- skipped each day, a daily check-in, and how many minutes feel like a full day.
+
+create table if not exists public.journal_items (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  title text not null,
+  type text not null,
+  days integer[] not null default '{}',   -- routines: weekdays, Monday = 1 ... Sunday = 7
+  date date,                              -- one-off tasks: the day it is planned for
+  part text not null default 'anytime' check (part in ('morning', 'afternoon', 'evening', 'anytime')),
+  minutes integer not null default 0 check (minutes between 0 and 600),
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.journal_marks (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  item_id uuid not null references public.journal_items (id) on delete cascade,
+  date date not null,
+  status text not null check (status in ('done', 'skipped')),
+  unique (user_id, item_id, date)
+);
+
+create table if not exists public.journal_days (
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  date date not null,
+  energy integer check (energy between 1 and 5),
+  mood text not null default '',
+  note text not null default '',
+  primary key (user_id, date)
+);
+
+create table if not exists public.journal_settings (
+  user_id uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  capacity_minutes integer not null default 120 check (capacity_minutes between 10 and 1440)
+);
+
+alter table public.journal_items enable row level security;
+alter table public.journal_marks enable row level security;
+alter table public.journal_days enable row level security;
+alter table public.journal_settings enable row level security;
+
+drop policy if exists "own journal items" on public.journal_items;
+create policy "own journal items" on public.journal_items for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "own journal marks" on public.journal_marks;
+create policy "own journal marks" on public.journal_marks for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "own journal days" on public.journal_days;
+create policy "own journal days" on public.journal_days for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "own journal settings" on public.journal_settings;
+create policy "own journal settings" on public.journal_settings for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+grant select, insert, update, delete on public.journal_items, public.journal_marks, public.journal_days, public.journal_settings to authenticated;
+revoke all on public.journal_items, public.journal_marks, public.journal_days, public.journal_settings from anon;

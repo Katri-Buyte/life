@@ -1,7 +1,8 @@
-import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231338';
-import { icon } from '../icons.js?v=202611231338';
-import { homeTile as vaultTile } from './vault.js?v=202611231338';
-import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231338';
+import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231353';
+import { icon } from '../icons.js?v=202611231353';
+import { homeTile as journalTile } from './journal.js?v=202611231353';
+import { homeTile as vaultTile } from './vault.js?v=202611231353';
+import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231353';
 
 function greeting() {
   const h = new Date().getHours();
@@ -63,12 +64,15 @@ export function render() {
        <span class="tile-line">No monthly budget yet. Open Budget and pick a category to set one.</span>`;
 
   return `
-    <header class="page-head">
+    <header class="page-head page-head-home">
+      <a class="icon-btn settings-link" href="#/settings" aria-label="Settings">${icon('settings', 22)}</a>
       <p class="eyebrow">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
       <h1>${greeting()}</h1>
     </header>
 
     <section class="bento" aria-label="Overview">
+      ${journalTile()}
+
       <a class="tile tone-butter span-2 tile-hero" href="#/budget">
         <span class="tile-icon">${icon('wallet', 22)}</span>
         ${budgetTile}
@@ -126,7 +130,11 @@ export function render() {
       </a>
       ${soonTile('pink', 'dumbbell', 'Workouts', 'Just Dance and walks')}
       ${soonTile('lavender', 'gift', 'Wishlist', 'Things to save up for')}
-      ${soonTile('sky', 'calendar-days', 'Schedule', 'Your week at a glance')}
+      <a class="tile tone-sky tile-module" href="#/journal">
+        <span class="tile-icon">${icon('notebook-pen', 22)}</span>
+        <span class="tile-name">Journal</span>
+        <span class="tile-line">Routines, check-ins and your week</span>
+      </a>
       ${soonTile('sage', 'earth', 'World map', 'Scratch off where you have been')}
     </section>`;
 }

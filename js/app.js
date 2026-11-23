@@ -1,18 +1,20 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231338';
-import { icon } from './icons.js?v=202611231338';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231338';
-import * as home from './views/home.js?v=202611231338';
-import * as budget from './views/budget.js?v=202611231338';
-import * as settings from './views/settings.js?v=202611231338';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231338';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231338';
-import * as subscriptions from './views/subscriptions.js?v=202611231338';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231338';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231353';
+import { icon } from './icons.js?v=202611231353';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231353';
+import * as home from './views/home.js?v=202611231353';
+import * as budget from './views/budget.js?v=202611231353';
+import * as settings from './views/settings.js?v=202611231353';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231353';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231353';
+import * as journal from './views/journal.js?v=202611231353';
+import * as subscriptions from './views/subscriptions.js?v=202611231353';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231353';
 
 const routes = {
   home: { title: 'Home', view: home },
   budget: { title: 'Budget', view: budget },
   subscriptions: { title: 'Subscriptions', view: subscriptions, nav: 'budget' },
+  journal: { title: 'Journal', view: journal },
   recipes: { title: 'Recipes', view: recipesView },
   plan: { title: 'Meal plan', view: planView, nav: 'recipes' },
   settings: { title: 'Settings', view: settings },
@@ -30,14 +32,17 @@ const currentRoute = () => {
 
 function renderNav(route) {
   const link = (name, ico, label) => `
-    <a class="nav-item" href="#/${name}" ${route === name ? 'aria-current="page"' : ''}>
+    <a class="nav-item nav-${name}" href="#/${name}" ${route === name ? 'aria-current="page"' : ''}>
       ${icon(ico, 22)}<span>${label}</span>
     </a>`;
   nav.innerHTML = `
     <a class="brand" href="#/home"><img src="icon.svg" alt="" width="28" height="28"> Life</a>
     ${link('home', 'layout-grid', 'Home')}
     ${link('budget', 'wallet', 'Budget')}
-    <button type="button" class="nav-add" data-action="add-txn" aria-label="Add transaction">${icon('plus', 24)}<span>Add transaction</span></button>
+    ${route === 'journal'
+      ? `<button type="button" class="nav-add" data-action="j-add" aria-label="Add to journal">${icon('plus', 24)}<span>Add to journal</span></button>`
+      : `<button type="button" class="nav-add" data-action="add-txn" aria-label="Add transaction">${icon('plus', 24)}<span>Add transaction</span></button>`}
+    ${link('journal', 'notebook-pen', 'Journal')}
     ${link('recipes', 'chef-hat', 'Recipes')}
     ${link('settings', 'settings', 'Settings')}`;
 }
@@ -79,10 +84,26 @@ const actions = {
   'sub-edit': (el) => subscriptions.openSubscriptionSheet(el.dataset.id),
   'sub-log': (el) => subscriptions.logPayment(el.dataset.id),
   'sub-skip': (el) => subscriptions.skipPayment(el.dataset.id),
+  'j-add': () => journal.openItemSheet(),
+  'j-add-routine': () => journal.openItemSheet(null, { date: null, days: [] }),
+  'j-edit': (el) => journal.openItemSheet(el.dataset.id),
+  'j-open': (el) => journal.openItemActions(el.dataset.id, el.dataset.date),
+  'j-toggle': (el) => journal.toggleDone(el.dataset.id, el.dataset.date),
+  'j-unskip': (el) => journal.unskip(el.dataset.id),
+  'j-template': (el) => journal.openTemplate(el.dataset.n),
+  'j-checkin': () => journal.openCheckIn(),
+  'j-capacity': () => journal.openCapacity(),
+  'jday-prev': () => { journal.shiftDay(-1); render(); },
+  'jday-next': () => { journal.shiftDay(1); render(); },
+  'jday-today': () => { journal.setDay(todayISO()); render(); },
+  'jweek-prev': () => { journal.shiftWeek(-1); render(); },
+  'jweek-next': () => { journal.shiftWeek(1); render(); },
+  'jweek-this': () => { journal.thisWeek(); render(); },
+  'go-day': (el) => { journal.setDay(el.dataset.date); if (location.hash === '#/journal') render(); else location.hash = '#/journal'; },
   'recipes-retry': () => retryRecipes(),
   'sign-out': () => signOut(),
   export: () => {
-    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions, journalItems: state.journalItems, journalMarks: state.journalMarks, journalDays: state.journalDays, journalSettings: state.journalSettings }, null, 2)], { type: 'application/json' });
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `life-backup-${todayISO()}.json` });
     a.click();
     URL.revokeObjectURL(a.href);
