@@ -1,8 +1,8 @@
 // The vault: savings inside the Budget section.
-import { state, newId, vaultSummary, vaultBalance, categoriesOf, saveVaultSettings, saveVaultEntry, removeVaultEntry } from '../store.js?v=202611231328';
-import { icon } from '../icons.js?v=202611231328';
-import { esc, money, moneyShort, parseAmount, amountInput, todayISO, monthOf, monthLabel, shortDate, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231328';
-import { head, showError } from './sheets.js?v=202611231328';
+import { state, newId, vaultSummary, vaultBalance, categoriesOf, saveVaultSettings, saveVaultEntry, removeVaultEntry } from '../store.js?v=202611231338';
+import { icon } from '../icons.js?v=202611231338';
+import { esc, money, moneyShort, parseAmount, amountInput, todayISO, monthOf, monthLabel, shortDate, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231338';
+import { head, showError } from './sheets.js?v=202611231338';
 
 // Share of the salary offered as a monthly saving goal. 20% is the saving part
 // of the common 50/30/20 budgeting rule of thumb; 10% and 15% are gentler starts.
@@ -245,7 +245,7 @@ export function openVaultSettingsSheet() {
 
     showError(form, 'starting', starting === null ? 'Type a number, for example 2000' : '');
     showError(form, 'goal', goal === null ? 'Type a number, for example 300' : '');
-    showError(form, 'salary', salary === null ? 'Type a number, for example 1500' : '');
+    showError(form, 'salary', salary === null ? 'Type a number, for example 1800' : '');
     if (salary === null || goal === null || starting === null) return;
 
     closeSheet();
