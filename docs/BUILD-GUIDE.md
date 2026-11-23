@@ -47,6 +47,7 @@ data/recipes.json        recipes and categories
 data/plans.json          meal plan: daily targets, foods table, weeks with a shopping list
 images/                  recipe photos stored with the app
 supabase/schema.sql      every database table and security rule, run once
+icons/                   app icons as PNG for the phone home screen (iPhone ignores SVG icons)
 serve.js                 local preview server: node serve.js  ->  http://localhost:4174
 tools/bump-version.js    run before publishing any change (see section 5)
 ```
