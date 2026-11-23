@@ -864,3 +864,13 @@ button.tile-checkin { text-align: left; }
 .set-btn[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
 .go-finish { display: grid; gap: 8px; justify-items: start; }
 .bubble.monogram svg { display: block; overflow: visible; }
+
+/* ---------- Pop-ups on iPhone ---------- */
+/* Safari on iPhone gives date fields a fixed minimum width that ignores width: 100%,
+   which pushed the Add transaction and Add to journal forms sideways. */
+.sheet { overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y pinch-zoom; }
+.sheet .form, .sheet .field, .sheet .field-row > *, .sheet .segmented > * { min-width: 0; }
+.sheet .input { max-width: 100%; }
+input[type='date'].input { -webkit-appearance: none; appearance: none; display: block; min-width: 0; width: 100%; line-height: 46px; padding-top: 0; padding-bottom: 0; }
+input[type='date'].input::-webkit-date-and-time-value { text-align: left; margin: 0; }
+input[type='date'].input::-webkit-calendar-picker-indicator { margin-left: auto; }

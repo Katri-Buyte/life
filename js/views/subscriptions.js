@@ -1,12 +1,12 @@
 // Bills and subscriptions: things paid every month, every few months or every year.
 // Shown under Budget. Bills can vary in amount; then Log asks what was actually paid.
 import { state, newId, categoriesOf, categoryById, saveSubscription, removeSubscription, saveTransaction, removeTransaction,
-  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid, billPayments, usualAmount } from '../store.js?v=202611231557';
-import { icon } from '../icons.js?v=202611231557';
-import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231557';
-import { head, showError, categoryChips } from './sheets.js?v=202611231557';
-import { BRANDS } from '../brands.js?v=202611231557';
-import { budgetNav } from './budget.js?v=202611231557';
+  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid, billPayments, usualAmount } from '../store.js?v=202611231603';
+import { icon } from '../icons.js?v=202611231603';
+import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231603';
+import { head, showError, categoryChips } from './sheets.js?v=202611231603';
+import { BRANDS } from '../brands.js?v=202611231603';
+import { budgetNav } from './budget.js?v=202611231603';
 
 // The service's logo if we know it; otherwise a bill shows its category icon and a
 // subscription its first letter, on the category colour.
