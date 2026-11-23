@@ -1,20 +1,20 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231409';
-import { icon } from './icons.js?v=202611231409';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231409';
-import * as home from './views/home.js?v=202611231409';
-import * as budget from './views/budget.js?v=202611231409';
-import * as settings from './views/settings.js?v=202611231409';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231409';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231409';
-import * as wishlist from './views/wishlist.js?v=202611231409';
-import * as journal from './views/journal.js?v=202611231409';
-import * as subscriptions from './views/subscriptions.js?v=202611231409';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231409';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231417';
+import { icon } from './icons.js?v=202611231417';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231417';
+import * as home from './views/home.js?v=202611231417';
+import * as budget from './views/budget.js?v=202611231417';
+import * as settings from './views/settings.js?v=202611231417';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231417';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231417';
+import * as wishlist from './views/wishlist.js?v=202611231417';
+import * as journal from './views/journal.js?v=202611231417';
+import * as subscriptions from './views/subscriptions.js?v=202611231417';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231417';
 
 const routes = {
   home: { title: 'Home', view: home },
   budget: { title: 'Budget', view: budget },
-  subscriptions: { title: 'Subscriptions', view: subscriptions, nav: 'budget' },
+  subscriptions: { title: 'Bills & subscriptions', view: subscriptions, nav: 'budget' },
   journal: { title: 'Journal', view: journal },
   wishlist: { title: 'Wishlist', view: wishlist, nav: 'budget' },
   recipes: { title: 'Recipes', view: recipesView },
@@ -82,7 +82,7 @@ const actions = {
   'go-month': (el) => { budget.setMonth(el.dataset.month); render(); window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); },
   'month-prev': () => { budget.shift(-1); render(); },
   'month-next': () => { budget.shift(1); render(); },
-  'sub-add': () => subscriptions.openSubscriptionSheet(),
+  'sub-add': (el) => subscriptions.openSubscriptionSheet(null, el.dataset.kind || 'subscription'),
   'sub-edit': (el) => subscriptions.openSubscriptionSheet(el.dataset.id),
   'sub-log': (el) => subscriptions.logPayment(el.dataset.id),
   'sub-skip': (el) => subscriptions.skipPayment(el.dataset.id),

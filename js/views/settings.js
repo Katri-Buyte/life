@@ -1,6 +1,6 @@
-import { state } from '../store.js?v=202611231409';
-import { icon } from '../icons.js?v=202611231409';
-import { esc } from '../ui.js?v=202611231409';
+import { state } from '../store.js?v=202611231417';
+import { icon } from '../icons.js?v=202611231417';
+import { esc } from '../ui.js?v=202611231417';
 
 export function render() {
   const cloud = state.mode === 'cloud';

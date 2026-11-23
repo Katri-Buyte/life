@@ -12,7 +12,7 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
   - Month totals: "Left after spending and saving" (income minus spending minus money put into the vault), spent, income. If category limits are set, the first tile becomes "Left to spend".
   - Vault: savings total, "Add money" and "Take out", a monthly saving goal suggested from the salary (10, 15 or 20%, with 20% from the 50/30/20 rule of thumb), and an in-app reminder until the goal is met.
   - Spending by day chart (with "View as table"), category cards with optional monthly limits, the transaction list, and a Monthly history (chart plus table of income, spent, saved and left per month).
-  - Subscriptions page: name, price, monthly or yearly, payment day, category. When a payment date passes it shows as Due with **Log** (adds the expense on its date) and **Skip**, both with Undo. An expense that month whose note contains the subscription's name counts as already paid. Known services show their logo.
+  - Bills & subs page (the subscriptions table, with a kind of bill or subscription): name, amount, how often (every month, every 2, 3, 4 or 6 months, or every year), payment day, category. A bill can be marked "The amount changes each time"; its amount is then an estimate and Log asks for the real amount, starting from what was paid last time. The page shows the monthly total split into bills and subscriptions and what is still to pay this month. When a payment date passes it shows as Due with **Log** (adds the expense on its date) and **Skip**, both with Undo. An expense that month whose note contains the name as whole words counts as already paid. Known services show their logo.
   - Wishlist page: name, a link to the product (a pasted address without https:// is completed; anything that is not a web address is refused), optional price, priority Need, Want or Someday, and a note. Totals sit next to the vault balance with how many priced items it could cover. **Bought it** moves an item to a Bought list and can add the purchase to expenses in the same step, with Undo.
   - Totals are per calendar month, so they start from zero on the 1st; the vault total carries over.
 - **Journal**, for staying on track without feeling overwhelmed
@@ -120,6 +120,7 @@ The original was built in one long session, one module at a time, each tested in
 8. **Journal**, so routines like cleaning, market runs and workouts are spread over the week with a check-in and a word for the day, and the app says when a day is too full.
 9. **Wishlist**, with a link to each item and a "Bought it" step that can log the expense.
 10. **Diary**, a mindfulness journal with daily trackers and guided questions, saved while typing.
+11. **Bills**, added to the subscriptions page with varying amounts and payments every few months.
 
 Planned but not built yet: phone notifications for the saving reminder (needs a service worker and a scheduled job), a fuller workouts module and a world scratch map.
 

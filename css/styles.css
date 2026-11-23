@@ -816,3 +816,4 @@ button.tile-checkin { text-align: left; }
 .more-q summary { cursor: pointer; font-weight: 700; min-height: 36px; display: inline-flex; align-items: center; }
 .more-q[open] summary { margin-bottom: 12px; }
 .more-q .field + .field { margin-top: 14px; }
+.section-sum { font: 600 14px var(--font); color: var(--ink-2); margin-left: 6px; }

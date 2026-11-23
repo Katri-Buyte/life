@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231409';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231417';
 
 export const state = {
   ready: false,
@@ -15,7 +15,7 @@ export const state = {
   journalDays: [],    // { id (= date), date, energy 1-5 or 0, mood, note, trackers {water, steps, ...}, answers {question key: text} }
   journalSettings: { capacity: 120, goals: {} }, // capacity: minutes that feel like a comfortable day; goals: daily tracker goals
   wishlist: [],       // { id, name, url, price (cents or 0), priority 'need'|'want'|'someday', note, boughtOn 'YYYY-MM-DD' or '', transactionId, createdAt }
-  subscriptions: [],  // { id, name, amount (cents), cycle 'monthly'|'yearly', day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
+  subscriptions: [],  // { id, kind 'subscription'|'bill', name, amount (cents; an estimate when variable), variable, cycle 'monthly'|'yearly', every (months, for monthly), day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
 };
 
 export const TONES = ['butter', 'pink', 'sage', 'sky', 'lavender', 'peach'];
@@ -45,12 +45,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231409');
+    const { create } = await import('./adapters/supabase.js?v=202611231417');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231409');
+    const { create } = await import('./adapters/local.js?v=202611231417');
     adapter = create();
   }
   await reload();
@@ -241,17 +241,32 @@ const addMonths = (month, by) => { const [y, m] = month.split('-').map(Number); 
 
 // The payment date in a given month ('YYYY-MM'), or null if there is none that month.
 // A payment day the month does not have (31st in November) falls on the month's last day.
+// Monthly payments can also come every 2, 3, 4 or 6 months: they fall in the months
+// that are a whole number of steps away from the month of the payment date (s.month).
 export function chargeDateIn(s, month) {
-  if (s.cycle === 'yearly' && Number(month.slice(5, 7)) !== s.month) return null;
+  const m = Number(month.slice(5, 7));
+  if (s.cycle === 'yearly' && m !== s.month) return null;
+  const every = s.every || 1;
+  if (s.cycle !== 'yearly' && every > 1 && (((m - s.month) % every) + every) % every !== 0) return null;
   return `${month}-${pad2(Math.min(s.day, daysIn(month)))}`;
 }
+
+// The name as whole words, so a bill called "Rent" does not match "Parent's gift".
+const nameMatcher = (name) => new RegExp(`(^|[^\\p{L}\\p{N}])${name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}\\p{N}])`, 'iu');
 
 // True when this month's payment is already in the transactions: logged from here,
 // skipped, or typed in by hand with the subscription's name in the note.
 export function subscriptionPaid(s, month) {
   if (s.handled === month) return true;
-  const name = s.name.trim().toLowerCase();
-  return transactionsIn(month).some((t) => t.kind === 'expense' && t.note.toLowerCase().includes(name));
+  const re = nameMatcher(s.name);
+  return transactionsIn(month).some((t) => t.kind === 'expense' && re.test(t.note));
+}
+
+// What was paid last time, for bills whose amount changes.
+export function lastPaid(s) {
+  const re = nameMatcher(s.name);
+  const t = state.transactions.filter((x) => x.kind === 'expense' && re.test(x.note)).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  return t ? t.amount : 0;
 }
 
 // { due: bool, date: next or overdue payment date, month: that payment's month, paidThisMonth }
@@ -262,12 +277,13 @@ export function subscriptionStatus(s, today) {
   if (thisDate && thisDate <= today && !paidThisMonth) return { due: true, date: thisDate, month: now, paidThisMonth };
   if (thisDate && thisDate > today) return { due: false, date: thisDate, month: now, paidThisMonth };
   let month = addMonths(now, 1);
-  while (!chargeDateIn(s, month)) month = addMonths(month, 1); // yearly: walk forward to its month
+  while (!chargeDateIn(s, month)) month = addMonths(month, 1); // yearly or every few months: walk forward to its month
   return { due: false, date: chargeDateIn(s, month), month, paidThisMonth };
 }
 
-export const monthlyCost = (s) => (s.cycle === 'yearly' ? Math.round(s.amount / 12) : s.amount);
-export const yearlyCost = (s) => (s.cycle === 'yearly' ? s.amount : s.amount * 12);
+const monthsBetween = (s) => (s.cycle === 'yearly' ? 12 : s.every || 1);
+export const monthlyCost = (s) => Math.round(s.amount / monthsBetween(s));
+export const yearlyCost = (s) => Math.round((s.amount * 12) / monthsBetween(s));
 
 // ---------- Journal ----------
 

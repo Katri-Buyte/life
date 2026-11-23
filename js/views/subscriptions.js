@@ -1,13 +1,15 @@
-// Subscriptions: things paid every month or every year. Shown under Budget.
+// Bills and subscriptions: things paid every month, every few months or every year.
+// Shown under Budget. Bills can vary in amount; then Log asks what was actually paid.
 import { state, newId, categoriesOf, categoryById, saveSubscription, removeSubscription, saveTransaction, removeTransaction,
-  subscriptionStatus, chargeDateIn, monthlyCost, yearlyCost } from '../store.js?v=202611231409';
-import { icon } from '../icons.js?v=202611231409';
-import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231409';
-import { head, showError, categoryChips } from './sheets.js?v=202611231409';
-import { BRANDS } from '../brands.js?v=202611231409';
-import { budgetNav } from './budget.js?v=202611231409';
+  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid } from '../store.js?v=202611231417';
+import { icon } from '../icons.js?v=202611231417';
+import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231417';
+import { head, showError, categoryChips } from './sheets.js?v=202611231417';
+import { BRANDS } from '../brands.js?v=202611231417';
+import { budgetNav } from './budget.js?v=202611231417';
 
-// The service's logo if we know it, otherwise its first letter on the category colour.
+// The service's logo if we know it; otherwise a bill shows its category icon and a
+// subscription its first letter, on the category colour.
 const squash = (name) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 export function findBrand(name) {
   const key = squash(name);
@@ -21,6 +23,7 @@ function serviceBubble(s) {
     return `<span class="bubble brand" style="background:#${b.hex};color:${fg}" title="${esc(b.title)}"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${b.path}"/></svg></span>`;
   }
   const c = categoryById(s.categoryId);
+  if (s.kind === 'bill') return `<span class="bubble tone-${c ? c.color : 'butter'}" aria-hidden="true">${icon(c ? c.icon : 'zap', 18)}</span>`;
   return `<span class="bubble monogram tone-${c ? c.color : 'sky'}" aria-hidden="true">${esc(s.name.trim().charAt(0).toUpperCase() || '?')}</span>`;
 }
 
@@ -29,7 +32,12 @@ const withYear = (d) => (d.slice(0, 4) === todayISO().slice(0, 4) ? shortDate(d)
 
 const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
 const monthName = (m) => new Date(2026, m - 1, 1).toLocaleDateString('en-GB', { month: 'long' });
-const when = (s) => (s.cycle === 'yearly' ? `every year on ${s.day} ${monthName(s.month)}` : `every month on the ${ordinal(s.day)}`);
+const when = (s) => (s.cycle === 'yearly' ? `every year on ${s.day} ${monthName(s.month)}`
+  : (s.every || 1) > 1 ? `every ${s.every} months on the ${ordinal(s.day)}` : `every month on the ${ordinal(s.day)}`);
+const FREQS = [[1, 'Every month'], [2, 'Every 2 months'], [3, 'Every 3 months'], [4, 'Every 4 months'], [6, 'Every 6 months'], [12, 'Every year']];
+const freqOf = (s) => (s.cycle === 'yearly' ? 12 : s.every || 1);
+const isBill = (s) => s.kind === 'bill';
+const amountText = (s) => `${s.variable ? 'about ' : ''}${money(s.amount)}`;
 
 function withStatus() {
   const today = todayISO();
@@ -44,27 +52,31 @@ function withStatus() {
 }
 
 const soonest = (list) => [...list].sort((a, b) => a.upcoming.localeCompare(b.upcoming))[0];
+const sumOf = (list, fn) => list.reduce((n, s) => n + fn(s), 0);
 
-const totals = () => ({
-  month: state.subscriptions.reduce((n, s) => n + monthlyCost(s), 0),
-  year: state.subscriptions.reduce((n, s) => n + yearlyCost(s), 0),
-});
+// Payments that fall in this calendar month and are not paid yet (variable bills at their estimate).
+function stillToPay() {
+  const month = monthOf(todayISO());
+  return state.subscriptions.filter((s) => chargeDateIn(s, month) && !subscriptionPaid(s, month));
+}
 
 // Small tile on the Budget overview.
 export function summaryTile() {
   const list = withStatus();
   const due = list.filter((x) => x.st.due);
-  const next = soonest(list);
-  const line = !list.length ? 'Add the things you pay for every month or year'
+  const left = stillToPay();
+  const leftSum = sumOf(left, (s) => s.amount);
+  const line = !list.length ? 'Add rent, utilities and the services you pay for'
     : due.length ? `${due.map((x) => esc(x.s.name)).join(', ')} ${due.length === 1 ? 'is' : 'are'} due`
-    : next ? `Next: ${esc(next.s.name)} on ${shortDate(next.upcoming)}` : '';
+    : left.length ? `${money(leftSum)} still to pay this month`
+    : 'Everything for this month is paid';
   return `
-    <section class="bento" aria-label="Subscriptions">
+    <section class="bento" aria-label="Bills and subscriptions">
       <a class="tile tone-sky span-all tile-subs" href="#/subscriptions">
         <span class="tile-icon">${icon('receipt', 22)}</span>
         <span class="tile-subs-main">
-          <span class="tile-label">Subscriptions</span>
-          <span class="figure figure-sm">${list.length ? `${money(totals().month)} <small>a month</small>` : 'None yet'}</span>
+          <span class="tile-label">Bills &amp; subscriptions</span>
+          <span class="figure figure-sm">${list.length ? `${money(sumOf(state.subscriptions, monthlyCost))} <small>a month</small>` : 'None yet'}</span>
           <span class="tile-line">${line}</span>
         </span>
         ${due.length ? `<span class="badge">${due.length} due</span>` : ''}
@@ -80,7 +92,7 @@ function subRow({ s, st }) {
         ${serviceBubble(s)}
         <span class="row-main">
           <span class="row-title">${esc(s.name)}</span>
-          <span class="row-sub wrap">${money(s.amount)} ${when(s)}</span>
+          <span class="row-sub wrap">${amountText(s)} ${when(s)}${s.variable ? ' · amount varies' : ''}</span>
         </span>
         <span class="row-end">
           <span class="status-pill${st.due ? ' is-due' : ''}">${st.due ? 'Due' : withYear(st.date)}</span>
@@ -90,11 +102,34 @@ function subRow({ s, st }) {
     </li>`;
 }
 
+function section(kind, list) {
+  const bill = kind === 'bill';
+  const title = bill ? 'Bills' : 'Subscriptions';
+  const items = list.filter((x) => (bill ? isBill(x.s) : !isBill(x.s)));
+  const perMonth = sumOf(items.map((x) => x.s), monthlyCost);
+  return `
+    <section aria-labelledby="h-${kind}">
+      <div class="section-row">
+        <h2 class="section-title" id="h-${kind}">${title}${items.length ? ` <small class="section-sum">${money(perMonth)} a month</small>` : ''}</h2>
+        <button type="button" class="btn btn-quiet" data-action="sub-add" data-kind="${kind}" aria-label="Add ${bill ? 'bill' : 'subscription'}">${icon('plus', 16)} Add</button>
+      </div>
+      <div class="panel">
+        ${items.length
+          ? `<ul class="rows">${items.map(subRow).join('')}</ul>`
+          : `<p class="empty">${bill
+            ? 'Rent, electricity, water, internet: add each one with its usual amount and payment day. If the amount changes each time, the app asks for it when you log it.'
+            : 'Netflix, Spotify, cloud storage: add each one with its price and payment day, and the app reminds you to log each payment.'}</p>`}
+      </div>
+    </section>`;
+}
+
 export function render() {
   const list = withStatus();
   const due = list.filter((x) => x.st.due);
   const next = soonest(list);
-  const t = totals();
+  const left = stillToPay();
+  const bills = state.subscriptions.filter(isBill);
+  const subs = state.subscriptions.filter((s) => !isBill(s));
 
   return `
     <header class="page-head page-head-row">
@@ -102,21 +137,21 @@ export function render() {
       ${budgetNav('subscriptions')}
     </header>
 
-    <section class="bento bento-3" aria-label="Subscription totals">
+    <section class="bento bento-3" aria-label="Bills and subscriptions totals">
       <div class="tile tone-sky span-2-sm">
-        <span class="tile-label">Subscriptions cost</span>
-        <span class="figure">${money(t.month)} <small>a month</small></span>
-        <span class="tile-line">${money(t.year)} a year · ${list.length} ${list.length === 1 ? 'subscription' : 'subscriptions'}</span>
+        <span class="tile-label">Bills &amp; subscriptions</span>
+        <span class="figure">${money(sumOf(state.subscriptions, monthlyCost))} <small>a month</small></span>
+        <span class="tile-line">Bills ${money(sumOf(bills, monthlyCost))} · Subscriptions ${money(sumOf(subs, monthlyCost))} · ${money(sumOf(state.subscriptions, yearlyCost))} a year</span>
       </div>
       <div class="tile tone-pink">
-        <span class="tile-label">Due now</span>
-        <span class="figure figure-sm">${due.length}</span>
-        <span class="tile-line">${due.length ? money(due.reduce((n, x) => n + x.s.amount, 0)) : 'Nothing to log'}</span>
+        <span class="tile-label">Still to pay this month</span>
+        <span class="figure figure-sm">${money(sumOf(left, (s) => s.amount))}</span>
+        <span class="tile-line">${left.length ? `${left.length} ${left.length === 1 ? 'payment' : 'payments'}${due.length ? `, ${due.length} due now` : ''}` : 'All paid'}</span>
       </div>
       <div class="tile tone-butter">
         <span class="tile-label">Next payment</span>
         <span class="figure figure-sm">${next ? esc(next.s.name) : 'None'}</span>
-        <span class="tile-line">${next ? `${money(next.s.amount)} on ${shortDate(next.upcoming)}` : 'Add a subscription to see it'}</span>
+        <span class="tile-line">${next ? `${amountText(next.s)} on ${shortDate(next.upcoming)}` : 'Add a bill or subscription to see it'}</span>
       </div>
     </section>
 
@@ -130,43 +165,67 @@ export function render() {
             ${serviceBubble(s)}
             <span class="row-main">
               <span class="row-title">${esc(s.name)}</span>
-              <span class="row-sub">${money(s.amount)} · due ${shortDate(st.date)}</span>
+              <span class="row-sub">${amountText(s)} · due ${shortDate(st.date)}</span>
             </span>
             <span class="sub-due-actions">
-              <button type="button" class="btn btn-on-tone" data-action="sub-log" data-id="${s.id}">${icon('check', 16)} Log ${money(s.amount)}</button>
+              <button type="button" class="btn btn-on-tone" data-action="sub-log" data-id="${s.id}">${icon('check', 16)} ${s.variable ? 'Log amount' : `Log ${money(s.amount)}`}</button>
               <button type="button" class="btn btn-ghost" data-action="sub-skip" data-id="${s.id}">Skip</button>
             </span>
           </li>`).join('')}
       </ul>
     </section>` : ''}
 
-    <section aria-labelledby="h-subs">
-      <div class="section-row">
-        <h2 class="section-title" id="h-subs">All subscriptions</h2>
-        <button type="button" class="btn btn-quiet" data-action="sub-add" aria-label="Add subscription">${icon('plus', 16)} Add</button>
-      </div>
-      <div class="panel">
-        ${list.length
-          ? `<ul class="rows">${list.map(subRow).join('')}</ul>`
-          : `<p class="empty">No subscriptions yet. Add things like Netflix or Spotify with their price and payment day, and the app will remind you to log each payment.</p>
-             <button type="button" class="btn btn-primary" data-action="sub-add">${icon('plus', 16)} Add your first subscription</button>`}
-      </div>
-    </section>`;
+    ${section('bill', list)}
+    ${section('subscription', list)}`;
 }
 
 // ---------- Log or skip a payment ----------
 
-export async function logPayment(id) {
-  const s = state.subscriptions.find((x) => x.id === id);
-  if (!s) return;
-  const st = subscriptionStatus(s, todayISO());
+async function record(s, st, amount, date) {
   const before = { ...s };
-  const txn = { id: newId(), date: st.date, amount: s.amount, kind: 'expense', categoryId: s.categoryId, note: s.name, createdAt: new Date().toISOString() };
+  const txn = { id: newId(), date, amount, kind: 'expense', categoryId: s.categoryId, note: s.name, createdAt: new Date().toISOString() };
   try {
     await saveTransaction(txn);
     await saveSubscription({ ...s, handled: st.month });
-    toast(`${s.name} logged`, { label: 'Undo', run: () => removeTransaction(txn.id).then(() => saveSubscription(before)).catch(saveFailed) });
+    toast(`${s.name} logged, ${money(amount)}`, { label: 'Undo', run: () => removeTransaction(txn.id).then(() => saveSubscription(before)).catch(saveFailed) });
   } catch { saveFailed(); }
+}
+
+export function logPayment(id) {
+  const s = state.subscriptions.find((x) => x.id === id);
+  if (!s) return;
+  const st = subscriptionStatus(s, todayISO());
+  if (!s.variable) { record(s, st, s.amount, st.date); return; }
+
+  // A bill whose amount changes: ask what was paid, starting from last time's amount.
+  const guess = lastPaid(s) || s.amount;
+  const el = openSheet(`
+    <form class="form" novalidate>
+      ${head(`Log ${esc(s.name)}`)}
+      <div class="field">
+        <label for="l-amount">Amount paid, in euros</label>
+        <input id="l-amount" name="amount" class="input input-amount" inputmode="decimal" autocomplete="off" value="${amountInput(guess)}" aria-describedby="l-amount-help" autofocus>
+        <p class="help" id="l-amount-help">${lastPaid(s) ? `Last time you paid ${money(lastPaid(s))}.` : `Your usual amount is ${money(s.amount)}.`}</p>
+        <p class="error" data-error="amount" hidden></p>
+      </div>
+      <div class="field">
+        <label for="l-date">Date</label>
+        <input id="l-date" name="date" type="date" class="input" value="${st.date}" max="${todayISO()}">
+        <p class="error" data-error="date" hidden></p>
+      </div>
+      <div class="sheet-actions"><span></span><button type="submit" class="btn btn-primary">${icon('check', 16)} Log payment</button></div>
+    </form>`);
+  const form = el.querySelector('form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const amount = parseAmount(form.elements.amount.value);
+    const date = form.elements.date.value;
+    showError(form, 'date', !date ? 'Pick the day you paid.' : date > todayISO() ? 'Pick today or earlier.' : '');
+    showError(form, 'amount', amount ? '' : 'Type the amount, for example 84.30');
+    if (!amount || !date || date > todayISO()) return;
+    closeSheet();
+    record(s, st, amount, date);
+  });
 }
 
 export async function skipPayment(id) {
@@ -182,33 +241,52 @@ export async function skipPayment(id) {
 
 // ---------- Add / edit ----------
 
-export function openSubscriptionSheet(id) {
+const defaultCategory = (kind) => {
+  const list = categoriesOf('expense');
+  return list.find((c) => c.name === (kind === 'bill' ? 'Home & bills' : 'Other')) || list[0];
+};
+
+export function openSubscriptionSheet(id, kind = 'subscription') {
   const existing = id ? state.subscriptions.find((x) => x.id === id) : null;
-  const other = categoriesOf('expense').find((c) => c.name === 'Other') || categoriesOf('expense')[0];
-  const s = existing || { id: newId(), name: '', amount: 0, cycle: 'monthly', day: 1, month: 1, categoryId: other ? other.id : '', handled: '', createdAt: new Date().toISOString() };
+  const k = existing ? existing.kind || 'subscription' : kind;
+  const cat = defaultCategory(k);
+  const s = existing || { id: newId(), kind: k, name: '', amount: 0, variable: false, cycle: 'monthly', every: 1, day: 1, month: 1, categoryId: cat ? cat.id : '', handled: '', createdAt: new Date().toISOString() };
   const nextDate = existing ? subscriptionStatus(s, todayISO()).date : '';
+  const noun = k === 'bill' ? 'bill' : 'subscription';
 
   const el = openSheet(`
     <form class="form" novalidate>
-      ${head(existing ? 'Edit subscription' : 'Add subscription')}
+      ${head(existing ? `Edit ${noun}` : `Add ${noun}`)}
+
+      <fieldset class="segmented">
+        <legend class="visually-hidden">Type</legend>
+        <label><input type="radio" name="kind" value="bill" ${k === 'bill' ? 'checked' : ''}><span>Bill</span></label>
+        <label><input type="radio" name="kind" value="subscription" ${k !== 'bill' ? 'checked' : ''}><span>Subscription</span></label>
+      </fieldset>
 
       <div class="field">
         <label for="s-name">Name</label>
-        <input id="s-name" name="name" class="input" maxlength="40" autocomplete="off" placeholder="For example: Netflix" value="${esc(s.name)}" ${existing ? '' : 'autofocus'}>
+        <input id="s-name" name="name" class="input" maxlength="40" autocomplete="off" placeholder="${k === 'bill' ? 'For example: Electricity' : 'For example: Netflix'}" value="${esc(s.name)}" ${existing ? '' : 'autofocus'}>
         <p class="help">Use the name you write on the expense, so payments you log by hand are recognised.</p>
         <p class="error" data-error="name" hidden></p>
       </div>
 
       <div class="field">
-        <label for="s-amount">Price in euros</label>
+        <label for="s-amount" data-amount-label>${s.variable ? 'Usual amount in euros' : 'Amount in euros'}</label>
         <input id="s-amount" name="amount" class="input input-amount" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${amountInput(s.amount)}">
         <p class="error" data-error="amount" hidden></p>
       </div>
 
-      <fieldset class="segmented">
-        <legend class="visually-hidden">How often</legend>
-        <label><input type="radio" name="cycle" value="monthly" ${s.cycle === 'monthly' ? 'checked' : ''}><span>Every month</span></label>
-        <label><input type="radio" name="cycle" value="yearly" ${s.cycle === 'yearly' ? 'checked' : ''}><span>Every year</span></label>
+      <label class="check-row" data-variable ${k === 'bill' ? '' : 'hidden'}>
+        <input type="checkbox" name="variable" ${s.variable ? 'checked' : ''}>
+        <span>The amount changes each time</span>
+      </label>
+
+      <fieldset class="field">
+        <legend>How often</legend>
+        <div class="chips">
+          ${FREQS.map(([n, label]) => `<label class="chip"><input type="radio" name="freq" value="${n}" ${freqOf(s) === n ? 'checked' : ''}><span>${label}</span></label>`).join('')}
+        </div>
       </fieldset>
 
       <div class="field">
@@ -220,26 +298,35 @@ export function openSubscriptionSheet(id) {
 
       <fieldset class="field">
         <legend>Category</legend>
-        <div class="chips">${categoryChips('expense', s.categoryId)}</div>
+        <div class="chips" data-cats>${categoryChips('expense', s.categoryId)}</div>
         <p class="error" data-error="categoryId" hidden></p>
       </fieldset>
 
       <div class="sheet-actions">
         ${existing ? `<button type="button" class="btn btn-quiet btn-danger" data-delete>${icon('trash-2', 16)} Delete</button>` : '<span></span>'}
-        <button type="submit" class="btn btn-primary">${existing ? 'Save changes' : 'Add subscription'}</button>
+        <button type="submit" class="btn btn-primary">${existing ? 'Save changes' : 'Add'}</button>
       </div>
     </form>`);
 
   const form = el.querySelector('form');
 
-  // Spell out what the picked date means, e.g. "every month on the 12th".
-  const explain = () => {
-    const d = form.elements.date.value;
-    if (!d) return;
-    const dt = fromISO(d);
-    form.querySelector('[data-date-help]').textContent = `Repeats ${when({ cycle: new FormData(form).get('cycle'), day: dt.getDate(), month: dt.getMonth() + 1 })}.`;
+  const shape = (data, dt) => {
+    const freq = Number(data.get('freq'));
+    return { cycle: freq === 12 ? 'yearly' : 'monthly', every: freq === 12 ? 1 : freq, day: dt.getDate(), month: dt.getMonth() + 1 };
   };
-  form.addEventListener('change', explain);
+  // Spell out what the picked date means, e.g. "every 2 months on the 3rd".
+  form.addEventListener('change', (e) => {
+    if (e.target.name === 'kind') {
+      const bill = e.target.value === 'bill';
+      form.querySelector('[data-variable]').hidden = !bill;
+      if (!existing) form.querySelector('[data-cats]').innerHTML = categoryChips('expense', (defaultCategory(e.target.value) || {}).id);
+    }
+    if (e.target.name === 'variable') {
+      form.querySelector('[data-amount-label]').textContent = e.target.checked ? 'Usual amount in euros' : 'Amount in euros';
+    }
+    const d = form.elements.date.value;
+    if (d) form.querySelector('[data-date-help]').textContent = `Repeats ${when(shape(new FormData(form), fromISO(d)))}.`;
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -248,15 +335,16 @@ export function openSubscriptionSheet(id) {
     const amount = parseAmount(data.get('amount'));
     const date = data.get('date');
     const categoryId = data.get('categoryId');
+    const kindNow = data.get('kind');
 
     showError(form, 'categoryId', categoryId ? '' : 'Pick a category.');
     showError(form, 'date', date ? '' : 'Pick the date of the next payment.');
-    showError(form, 'amount', amount ? '' : 'Type the price, for example 12.99');
+    showError(form, 'amount', amount ? '' : 'Type the amount, for example 12.99');
     showError(form, 'name', name ? '' : 'Give it a name.');
     if (!name || !amount || !date || !categoryId) return;
 
     const dt = fromISO(date);
-    const next = { ...s, name, amount, cycle: data.get('cycle'), day: dt.getDate(), month: dt.getMonth() + 1, categoryId };
+    const next = { ...s, kind: kindNow, name, amount, variable: kindNow === 'bill' && !!data.get('variable'), categoryId, ...shape(data, dt) };
     // If the next payment is in the future, this month's earlier payment (if any) is
     // already behind you, so do not ask to log it.
     const today = todayISO();

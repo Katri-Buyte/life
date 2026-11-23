@@ -200,3 +200,10 @@ revoke all on public.wishlist_items from anon;
 alter table public.journal_days add column if not exists trackers jsonb not null default '{}'::jsonb;
 alter table public.journal_days add column if not exists answers jsonb not null default '{}'::jsonb;
 alter table public.journal_settings add column if not exists goals jsonb not null default '{}'::jsonb;
+
+-- Bills (added 2026-11-23): bills share the subscriptions table. A bill can vary in
+-- amount (amount_cents is then an estimate) and can come every 2, 3, 4 or 6 months.
+
+alter table public.subscriptions add column if not exists kind text not null default 'subscription' check (kind in ('subscription', 'bill'));
+alter table public.subscriptions add column if not exists variable boolean not null default false;
+alter table public.subscriptions add column if not exists every_months integer not null default 1 check (every_months in (1, 2, 3, 4, 6));
