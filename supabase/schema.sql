@@ -207,3 +207,11 @@ alter table public.journal_settings add column if not exists goals jsonb not nul
 alter table public.subscriptions add column if not exists kind text not null default 'subscription' check (kind in ('subscription', 'bill'));
 alter table public.subscriptions add column if not exists variable boolean not null default false;
 alter table public.subscriptions add column if not exists every_months integer not null default 1 check (every_months in (1, 2, 3, 4, 6));
+
+-- Bills added by hand (added 2026-11-23): cycle 'manual' has no payment date; each
+-- bill is added as an expense when it arrives. Its typed amount is optional, so 0 is allowed.
+
+alter table public.subscriptions drop constraint if exists subscriptions_cycle_check;
+alter table public.subscriptions add constraint subscriptions_cycle_check check (cycle in ('monthly', 'yearly', 'manual'));
+alter table public.subscriptions drop constraint if exists subscriptions_amount_cents_check;
+alter table public.subscriptions add constraint subscriptions_amount_cents_check check (amount_cents >= 0);

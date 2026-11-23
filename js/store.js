@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231417';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231434';
 
 export const state = {
   ready: false,
@@ -45,12 +45,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231417');
+    const { create } = await import('./adapters/supabase.js?v=202611231434');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231417');
+    const { create } = await import('./adapters/local.js?v=202611231434');
     adapter = create();
   }
   await reload();
@@ -243,7 +243,9 @@ const addMonths = (month, by) => { const [y, m] = month.split('-').map(Number); 
 // A payment day the month does not have (31st in November) falls on the month's last day.
 // Monthly payments can also come every 2, 3, 4 or 6 months: they fall in the months
 // that are a whole number of steps away from the month of the payment date (s.month).
+// Bills you add yourself each time (cycle 'manual') have no payment date at all.
 export function chargeDateIn(s, month) {
+  if (s.cycle === 'manual') return null;
   const m = Number(month.slice(5, 7));
   if (s.cycle === 'yearly' && m !== s.month) return null;
   const every = s.every || 1;
@@ -262,16 +264,46 @@ export function subscriptionPaid(s, month) {
   return transactionsIn(month).some((t) => t.kind === 'expense' && re.test(t.note));
 }
 
+// Every expense for this bill or subscription, newest first: logged from the Bills
+// page, added with its Add button, or typed in by hand with its name in the note.
+export function billPayments(s) {
+  const re = nameMatcher(s.name);
+  return state.transactions.filter((x) => x.kind === 'expense' && re.test(x.note)).sort((a, b) => (a.date === b.date ? (a.createdAt < b.createdAt ? 1 : -1) : a.date < b.date ? 1 : -1));
+}
+
 // What was paid last time, for bills whose amount changes.
 export function lastPaid(s) {
-  const re = nameMatcher(s.name);
-  const t = state.transactions.filter((x) => x.kind === 'expense' && re.test(x.note)).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  const t = billPayments(s)[0];
   return t ? t.amount : 0;
 }
 
+// The usual amount: the average of the last three payments, or the typed estimate.
+export function usualAmount(s) {
+  const last = billPayments(s).slice(0, 3);
+  return last.length ? Math.round(last.reduce((n, t) => n + t.amount, 0) / last.length) : s.amount;
+}
+
+// For bills added by hand: what they cost per month, averaged over the last 12 months
+// (or since the first payment, if that is more recent). A bill of 180 every two months
+// comes out at about 90 a month.
+function manualMonthly(s, today) {
+  const now = today.slice(0, 7);
+  const from = addMonths(now, -11);
+  const list = billPayments(s).filter((t) => t.date.slice(0, 7) >= from);
+  if (!list.length) return s.amount;
+  const first = list[list.length - 1].date.slice(0, 7);
+  const [fy, fm] = first.split('-').map(Number);
+  const [ny, nm] = now.split('-').map(Number);
+  const months = Math.max(1, (ny - fy) * 12 + (nm - fm) + 1);
+  return Math.round(list.reduce((n, t) => n + t.amount, 0) / months);
+}
+
 // { due: bool, date: next or overdue payment date, month: that payment's month, paidThisMonth }
+// Bills added by hand are never due and have no date; paidThisMonth says whether this
+// month's bill has been added.
 export function subscriptionStatus(s, today) {
   const now = today.slice(0, 7);
+  if (s.cycle === 'manual') return { due: false, date: null, month: now, paidThisMonth: subscriptionPaid(s, now), manual: true };
   const thisDate = chargeDateIn(s, now);
   const paidThisMonth = thisDate ? subscriptionPaid(s, now) : false;
   if (thisDate && thisDate <= today && !paidThisMonth) return { due: true, date: thisDate, month: now, paidThisMonth };
@@ -282,8 +314,9 @@ export function subscriptionStatus(s, today) {
 }
 
 const monthsBetween = (s) => (s.cycle === 'yearly' ? 12 : s.every || 1);
-export const monthlyCost = (s) => Math.round(s.amount / monthsBetween(s));
-export const yearlyCost = (s) => Math.round((s.amount * 12) / monthsBetween(s));
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+export const monthlyCost = (s) => (s.cycle === 'manual' ? manualMonthly(s, todayStr()) : Math.round(s.amount / monthsBetween(s)));
+export const yearlyCost = (s) => (s.cycle === 'manual' ? manualMonthly(s, todayStr()) * 12 : Math.round((s.amount * 12) / monthsBetween(s)));
 
 // ---------- Journal ----------
 

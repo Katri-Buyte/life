@@ -1,12 +1,12 @@
 // Bills and subscriptions: things paid every month, every few months or every year.
 // Shown under Budget. Bills can vary in amount; then Log asks what was actually paid.
 import { state, newId, categoriesOf, categoryById, saveSubscription, removeSubscription, saveTransaction, removeTransaction,
-  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid } from '../store.js?v=202611231417';
-import { icon } from '../icons.js?v=202611231417';
-import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231417';
-import { head, showError, categoryChips } from './sheets.js?v=202611231417';
-import { BRANDS } from '../brands.js?v=202611231417';
-import { budgetNav } from './budget.js?v=202611231417';
+  subscriptionStatus, subscriptionPaid, chargeDateIn, monthlyCost, yearlyCost, lastPaid, billPayments, usualAmount } from '../store.js?v=202611231434';
+import { icon } from '../icons.js?v=202611231434';
+import { esc, money, parseAmount, amountInput, todayISO, monthOf, fromISO, shortDate, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231434';
+import { head, showError, categoryChips } from './sheets.js?v=202611231434';
+import { BRANDS } from '../brands.js?v=202611231434';
+import { budgetNav } from './budget.js?v=202611231434';
 
 // The service's logo if we know it; otherwise a bill shows its category icon and a
 // subscription its first letter, on the category colour.
@@ -32,12 +32,18 @@ const withYear = (d) => (d.slice(0, 4) === todayISO().slice(0, 4) ? shortDate(d)
 
 const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
 const monthName = (m) => new Date(2026, m - 1, 1).toLocaleDateString('en-GB', { month: 'long' });
-const when = (s) => (s.cycle === 'yearly' ? `every year on ${s.day} ${monthName(s.month)}`
+const isManual = (s) => s.cycle === 'manual';
+const when = (s) => (isManual(s) ? 'added by you when it arrives'
+  : s.cycle === 'yearly' ? `every year on ${s.day} ${monthName(s.month)}`
   : (s.every || 1) > 1 ? `every ${s.every} months on the ${ordinal(s.day)}` : `every month on the ${ordinal(s.day)}`);
-const FREQS = [[1, 'Every month'], [2, 'Every 2 months'], [3, 'Every 3 months'], [4, 'Every 4 months'], [6, 'Every 6 months'], [12, 'Every year']];
-const freqOf = (s) => (s.cycle === 'yearly' ? 12 : s.every || 1);
+// 0 = no fixed date: you add each bill yourself when it arrives.
+const FREQS = [[1, 'Every month'], [2, 'Every 2 months'], [3, 'Every 3 months'], [4, 'Every 4 months'], [6, 'Every 6 months'], [12, 'Every year'], [0, 'I add it each time']];
+const freqOf = (s) => (isManual(s) ? 0 : s.cycle === 'yearly' ? 12 : s.every || 1);
 const isBill = (s) => s.kind === 'bill';
-const amountText = (s) => `${s.variable ? 'about ' : ''}${money(s.amount)}`;
+const amountText = (s) => (isManual(s)
+  ? (billPayments(s).length || s.amount ? `usually about ${money(usualAmount(s))}` : 'no bills added yet')
+  : `${s.variable ? 'about ' : ''}${money(s.amount)}`);
+const monthShort = (d) => fromISO(d).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
 function withStatus() {
   const today = todayISO();
@@ -48,10 +54,11 @@ function withStatus() {
       const upcoming = st.due ? subscriptionStatus({ ...s, handled: st.month }, today).date : st.date;
       return { s, st, upcoming };
     })
-    .sort((a, b) => (a.st.due !== b.st.due ? (a.st.due ? -1 : 1) : a.st.date.localeCompare(b.st.date)));
+    // Due first, then by date; bills you add yourself (no date) last.
+    .sort((a, b) => (a.st.due !== b.st.due ? (a.st.due ? -1 : 1) : (a.st.date || '9999').localeCompare(b.st.date || '9999')));
 }
 
-const soonest = (list) => [...list].sort((a, b) => a.upcoming.localeCompare(b.upcoming))[0];
+const soonest = (list) => list.filter((x) => x.upcoming).sort((a, b) => a.upcoming.localeCompare(b.upcoming))[0];
 const sumOf = (list, fn) => list.reduce((n, s) => n + fn(s), 0);
 
 // Payments that fall in this calendar month and are not paid yet (variable bills at their estimate).
@@ -85,7 +92,25 @@ export function summaryTile() {
     </section>`;
 }
 
+// A bill you add yourself: shows this month's bill if it is in, and an Add button.
+function manualRow({ s, st }) {
+  const thisMonth = monthOf(todayISO());
+  const latest = billPayments(s).find((t) => t.date.startsWith(thisMonth));
+  return `
+    <li class="jrow">
+      <button type="button" class="row" data-action="sub-edit" data-id="${s.id}">
+        ${serviceBubble(s)}
+        <span class="row-main">
+          <span class="row-title">${esc(s.name)}</span>
+          <span class="row-sub wrap">${latest ? `This month: ${money(latest.amount)} · ${shortDate(latest.date)}` : `Not added this month · ${amountText(s)}`}</span>
+        </span>
+      </button>
+      <button type="button" class="btn btn-quiet btn-add-bill" data-action="sub-entry" data-id="${s.id}" aria-label="Add a ${esc(s.name)} bill">${icon('plus', 16)} Add</button>
+    </li>`;
+}
+
 function subRow({ s, st }) {
+  if (isManual(s)) return manualRow({ s, st });
   return `
     <li>
       <button type="button" class="row" data-action="sub-edit" data-id="${s.id}">
@@ -117,7 +142,7 @@ function section(kind, list) {
         ${items.length
           ? `<ul class="rows">${items.map(subRow).join('')}</ul>`
           : `<p class="empty">${bill
-            ? 'Rent, electricity, water, internet: add each one with its usual amount and payment day. If the amount changes each time, the app asks for it when you log it.'
+            ? 'Rent, electricity, water, building upkeep. Fixed ones get a payment day; for ones that change, choose "I add it each time" and add each bill when it arrives.'
             : 'Netflix, Spotify, cloud storage: add each one with its price and payment day, and the app reminds you to log each payment.'}</p>`}
       </div>
     </section>`;
@@ -228,6 +253,46 @@ export function logPayment(id) {
   });
 }
 
+// ---------- Add a bill by hand ----------
+
+export function openBillEntry(id) {
+  const s = state.subscriptions.find((x) => x.id === id);
+  if (!s) return;
+  const past = billPayments(s);
+  const el = openSheet(`
+    <form class="form" novalidate>
+      ${head(`Add ${esc(s.name)} bill`)}
+      <div class="field">
+        <label for="e-amount">Amount, in euros</label>
+        <input id="e-amount" name="amount" class="input input-amount" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="e-amount-help" autofocus>
+        <p class="help" id="e-amount-help">${past.length ? `Last bill: ${money(past[0].amount)} in ${monthShort(past[0].date)}. Usually about ${money(usualAmount(s))}.` : 'Type the amount on the bill.'}</p>
+        <p class="error" data-error="amount" hidden></p>
+      </div>
+      <div class="field">
+        <label for="e-date">Date paid</label>
+        <input id="e-date" name="date" type="date" class="input" value="${todayISO()}" max="${todayISO()}">
+        <p class="error" data-error="date" hidden></p>
+      </div>
+      <p class="help">It is added to your expenses under ${esc((categoryById(s.categoryId) || {}).name || 'its category')} and shows on this bill.</p>
+      <div class="sheet-actions"><span></span><button type="submit" class="btn btn-primary">${icon('plus', 16)} Add bill</button></div>
+    </form>`);
+  const form = el.querySelector('form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = parseAmount(form.elements.amount.value);
+    const date = form.elements.date.value;
+    showError(form, 'date', !date ? 'Pick the day you paid it.' : date > todayISO() ? 'Pick today or earlier.' : '');
+    showError(form, 'amount', amount ? '' : 'Type the amount, for example 84.30');
+    if (!amount || !date || date > todayISO()) return;
+    const txn = { id: newId(), date, amount, kind: 'expense', categoryId: s.categoryId, note: s.name, createdAt: new Date().toISOString() };
+    closeSheet();
+    try {
+      await saveTransaction(txn);
+      toast(`${s.name} bill added, ${money(amount)}`, { label: 'Undo', run: () => removeTransaction(txn.id).catch(saveFailed) });
+    } catch { saveFailed(); }
+  });
+}
+
 export async function skipPayment(id) {
   const s = state.subscriptions.find((x) => x.id === id);
   if (!s) return;
@@ -251,8 +316,10 @@ export function openSubscriptionSheet(id, kind = 'subscription') {
   const k = existing ? existing.kind || 'subscription' : kind;
   const cat = defaultCategory(k);
   const s = existing || { id: newId(), kind: k, name: '', amount: 0, variable: false, cycle: 'monthly', every: 1, day: 1, month: 1, categoryId: cat ? cat.id : '', handled: '', createdAt: new Date().toISOString() };
-  const nextDate = existing ? subscriptionStatus(s, todayISO()).date : '';
+  const nextDate = existing ? subscriptionStatus(s, todayISO()).date || '' : '';
   const noun = k === 'bill' ? 'bill' : 'subscription';
+  const manual = isManual(s);
+  const history = existing ? billPayments(s).slice(0, 6) : [];
 
   const el = openSheet(`
     <form class="form" novalidate>
@@ -272,12 +339,13 @@ export function openSubscriptionSheet(id, kind = 'subscription') {
       </div>
 
       <div class="field">
-        <label for="s-amount" data-amount-label>${s.variable ? 'Usual amount in euros' : 'Amount in euros'}</label>
+        <label for="s-amount" data-amount-label>${manual ? 'Usual amount in euros <span class="optional">optional</span>' : s.variable ? 'Usual amount in euros' : 'Amount in euros'}</label>
         <input id="s-amount" name="amount" class="input input-amount" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${amountInput(s.amount)}">
+        <p class="help" data-manual-help ${manual ? '' : 'hidden'}>Only a guess until you add real bills; after that the app uses the average of your last three.</p>
         <p class="error" data-error="amount" hidden></p>
       </div>
 
-      <label class="check-row" data-variable ${k === 'bill' ? '' : 'hidden'}>
+      <label class="check-row" data-variable ${k === 'bill' && !manual ? '' : 'hidden'}>
         <input type="checkbox" name="variable" ${s.variable ? 'checked' : ''}>
         <span>The amount changes each time</span>
       </label>
@@ -285,11 +353,12 @@ export function openSubscriptionSheet(id, kind = 'subscription') {
       <fieldset class="field">
         <legend>How often</legend>
         <div class="chips">
-          ${FREQS.map(([n, label]) => `<label class="chip"><input type="radio" name="freq" value="${n}" ${freqOf(s) === n ? 'checked' : ''}><span>${label}</span></label>`).join('')}
+          ${FREQS.map(([n, label]) => `<label class="chip" ${n === 0 ? `data-manual-chip ${k === 'bill' ? '' : 'hidden'}` : ''}><input type="radio" name="freq" value="${n}" ${freqOf(s) === n ? 'checked' : ''}><span>${label}</span></label>`).join('')}
         </div>
+        <p class="help" data-manual-note ${manual ? '' : 'hidden'}>No fixed day or amount. Use the Add button next to the bill each time one arrives.</p>
       </fieldset>
 
-      <div class="field">
+      <div class="field" data-date-field ${manual ? 'hidden' : ''}>
         <label for="s-date">Next payment</label>
         <input id="s-date" name="date" type="date" class="input" value="${nextDate}" aria-describedby="s-date-help">
         <p class="help" id="s-date-help" data-date-help>${existing ? `Currently ${when(s)}.` : 'The app repeats it on the same day each time.'}</p>
@@ -301,6 +370,15 @@ export function openSubscriptionSheet(id, kind = 'subscription') {
         <div class="chips" data-cats>${categoryChips('expense', s.categoryId)}</div>
         <p class="error" data-error="categoryId" hidden></p>
       </fieldset>
+
+      ${history.length ? `
+      <div class="field">
+        <p class="field-title">Recent payments</p>
+        <ul class="history-list">
+          ${history.map((t) => `<li><span>${monthShort(t.date)} <small>${shortDate(t.date)}</small></span><b>${money(t.amount)}</b></li>`).join('')}
+        </ul>
+        <p class="help">Usually about ${money(usualAmount(s))} · about ${money(monthlyCost(s))} a month on average.</p>
+      </div>` : ''}
 
       <div class="sheet-actions">
         ${existing ? `<button type="button" class="btn btn-quiet btn-danger" data-delete>${icon('trash-2', 16)} Delete</button>` : '<span></span>'}
@@ -315,28 +393,54 @@ export function openSubscriptionSheet(id, kind = 'subscription') {
     return { cycle: freq === 12 ? 'yearly' : 'monthly', every: freq === 12 ? 1 : freq, day: dt.getDate(), month: dt.getMonth() + 1 };
   };
   // Spell out what the picked date means, e.g. "every 2 months on the 3rd".
+  const isManualPicked = () => new FormData(form).get('freq') === '0';
+  // Show only what fits: bills you add each time need no date, no "varies" box,
+  // and only an optional usual amount.
+  const sync = () => {
+    const bill = new FormData(form).get('kind') === 'bill';
+    const chip = form.querySelector('[data-manual-chip]');
+    chip.hidden = !bill;
+    if (!bill && isManualPicked()) form.querySelector('input[name=freq][value="1"]').checked = true;
+    const m = bill && isManualPicked();
+    form.querySelector('[data-date-field]').hidden = m;
+    form.querySelector('[data-variable]').hidden = !bill || m;
+    form.querySelector('[data-manual-note]').hidden = !m;
+    form.querySelector('[data-manual-help]').hidden = !m;
+    form.querySelector('[data-amount-label]').innerHTML = m ? 'Usual amount in euros <span class="optional">optional</span>'
+      : form.elements.variable.checked && bill ? 'Usual amount in euros' : 'Amount in euros';
+  };
   form.addEventListener('change', (e) => {
-    if (e.target.name === 'kind') {
-      const bill = e.target.value === 'bill';
-      form.querySelector('[data-variable]').hidden = !bill;
-      if (!existing) form.querySelector('[data-cats]').innerHTML = categoryChips('expense', (defaultCategory(e.target.value) || {}).id);
-    }
-    if (e.target.name === 'variable') {
-      form.querySelector('[data-amount-label]').textContent = e.target.checked ? 'Usual amount in euros' : 'Amount in euros';
-    }
+    if (e.target.name === 'kind' && !existing) form.querySelector('[data-cats]').innerHTML = categoryChips('expense', (defaultCategory(e.target.value) || {}).id);
+    sync();
     const d = form.elements.date.value;
-    if (d) form.querySelector('[data-date-help]').textContent = `Repeats ${when(shape(new FormData(form), fromISO(d)))}.`;
+    if (d && !isManualPicked()) form.querySelector('[data-date-help]').textContent = `Repeats ${when(shape(new FormData(form), fromISO(d)))}.`;
   });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = new FormData(form);
     const name = String(data.get('name')).trim();
-    const amount = parseAmount(data.get('amount'));
-    const date = data.get('date');
     const categoryId = data.get('categoryId');
     const kindNow = data.get('kind');
 
+    if (kindNow === 'bill' && isManualPicked()) {
+      const text = String(data.get('amount')).trim();
+      const usual = text ? parseAmount(text) : 0;
+      showError(form, 'categoryId', categoryId ? '' : 'Pick a category.');
+      showError(form, 'amount', usual === null ? 'Type a number, for example 80, or leave it empty' : '');
+      showError(form, 'name', name ? '' : 'Give it a name.');
+      if (!name || usual === null || !categoryId) return;
+      closeSheet();
+      try {
+        // day and month are not used for these bills; they are kept valid for the database.
+        await saveSubscription({ ...s, kind: 'bill', name, amount: usual, variable: true, cycle: 'manual', every: 1, day: s.day || 1, month: s.month || 1, categoryId, handled: '' });
+        toast(existing ? 'Changes saved' : `${name} added. Use Add next to it when a bill arrives.`);
+      } catch { saveFailed(); }
+      return;
+    }
+
+    const amount = parseAmount(data.get('amount'));
+    const date = data.get('date');
     showError(form, 'categoryId', categoryId ? '' : 'Pick a category.');
     showError(form, 'date', date ? '' : 'Pick the date of the next payment.');
     showError(form, 'amount', amount ? '' : 'Type the amount, for example 12.99');

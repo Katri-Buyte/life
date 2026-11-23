@@ -817,3 +817,8 @@ button.tile-checkin { text-align: left; }
 .more-q[open] summary { margin-bottom: 12px; }
 .more-q .field + .field { margin-top: 14px; }
 .section-sum { font: 600 14px var(--font); color: var(--ink-2); margin-left: 6px; }
+.btn-add-bill { flex: none; min-height: 40px; padding: 0 14px; }
+.field-title { font-size: 13px; font-weight: 700; }
+.history-list { display: grid; }
+.history-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.history-list small { color: var(--ink-2); margin-left: 6px; }

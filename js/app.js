@@ -1,15 +1,15 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231417';
-import { icon } from './icons.js?v=202611231417';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231417';
-import * as home from './views/home.js?v=202611231417';
-import * as budget from './views/budget.js?v=202611231417';
-import * as settings from './views/settings.js?v=202611231417';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231417';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231417';
-import * as wishlist from './views/wishlist.js?v=202611231417';
-import * as journal from './views/journal.js?v=202611231417';
-import * as subscriptions from './views/subscriptions.js?v=202611231417';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231417';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231434';
+import { icon } from './icons.js?v=202611231434';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231434';
+import * as home from './views/home.js?v=202611231434';
+import * as budget from './views/budget.js?v=202611231434';
+import * as settings from './views/settings.js?v=202611231434';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231434';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231434';
+import * as wishlist from './views/wishlist.js?v=202611231434';
+import * as journal from './views/journal.js?v=202611231434';
+import * as subscriptions from './views/subscriptions.js?v=202611231434';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231434';
 
 const routes = {
   home: { title: 'Home', view: home },
@@ -84,6 +84,7 @@ const actions = {
   'month-next': () => { budget.shift(1); render(); },
   'sub-add': (el) => subscriptions.openSubscriptionSheet(null, el.dataset.kind || 'subscription'),
   'sub-edit': (el) => subscriptions.openSubscriptionSheet(el.dataset.id),
+  'sub-entry': (el) => subscriptions.openBillEntry(el.dataset.id),
   'sub-log': (el) => subscriptions.logPayment(el.dataset.id),
   'sub-skip': (el) => subscriptions.skipPayment(el.dataset.id),
   'wish-add': () => wishlist.openWishSheet(),
