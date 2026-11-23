@@ -1,6 +1,6 @@
-import { state } from '../store.js?v=202611231603';
-import { icon } from '../icons.js?v=202611231603';
-import { esc } from '../ui.js?v=202611231603';
+import { state } from '../store.js?v=202611231608';
+import { icon } from '../icons.js?v=202611231608';
+import { esc } from '../ui.js?v=202611231608';
 
 export function render() {
   const cloud = state.mode === 'cloud';
@@ -19,9 +19,26 @@ export function render() {
 
     <section class="panel" aria-labelledby="h-backup">
       <h2 id="h-backup">Backup</h2>
-      <p class="help">Downloads all categories and transactions as one file you can keep somewhere safe.</p>
+      <p class="help">Downloads all your data as one file you can keep somewhere safe.</p>
       <button type="button" class="btn btn-quiet" data-action="export">Download backup</button>
+    </section>
+
+    <section class="panel" aria-labelledby="h-version">
+      <h2 id="h-version">App version</h2>
+      <p class="status">${icon('sparkles', 20)} <span>You are using the version from <strong>${versionLabel()}</strong>.</span></p>
+      <p class="help">Phones can keep an older copy for a while after an update. This loads the newest one.</p>
+      <button type="button" class="btn btn-quiet" data-action="app-update">${icon('undo-2', 16)} Get the latest version</button>
     </section>`;
+}
+
+// The version is the ?v= stamp this file was loaded with, e.g. 202611231603 (UTC),
+// shown in the phone's own time zone.
+function versionLabel() {
+  const v = new URL(import.meta.url).searchParams.get('v') || '';
+  const m = v.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/);
+  if (!m) return 'this computer (not published)';
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
+  return d.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 export function renderSignIn() {

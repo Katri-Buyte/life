@@ -1,9 +1,9 @@
 // Recipes and meal plan. All content lives in data/recipes.json and
 // data/plans.json, with photos in images/ (see RECIPES_BASE in config.js).
-import { RECIPES_BASE } from '../config.js?v=202611231603';
-import { TONES } from '../store.js?v=202611231603';
-import { icon } from '../icons.js?v=202611231603';
-import { esc, todayISO, iso, fromISO } from '../ui.js?v=202611231603';
+import { RECIPES_BASE } from '../config.js?v=202611231608';
+import { TONES } from '../store.js?v=202611231608';
+import { icon } from '../icons.js?v=202611231608';
+import { esc, todayISO, iso, fromISO } from '../ui.js?v=202611231608';
 
 let DATA = { categories: [], recipes: [] };
 let PLANS = { weeks: [] };
