@@ -216,27 +216,6 @@ alter table public.subscriptions add constraint subscriptions_cycle_check check 
 alter table public.subscriptions drop constraint if exists subscriptions_amount_cents_check;
 alter table public.subscriptions add constraint subscriptions_amount_cents_check check (amount_cents >= 0);
 
--- World map (added 2026-11-23): countries visited or wanted, one row per country.
-
-create table if not exists public.places (
-  id uuid primary key,
-  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
-  country text not null check (char_length(country) = 2),
-  status text not null check (status in ('visited', 'want')),
-  year text not null default '',
-  note text not null default '',
-  created_at timestamptz not null default now(),
-  unique (user_id, country)
-);
-
-alter table public.places enable row level security;
-
-drop policy if exists "own places" on public.places;
-create policy "own places" on public.places for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-
-grant select, insert, update, delete on public.places to authenticated;
-revoke all on public.places from anon;
-
 -- Workouts (added 2026-11-23): workouts with their exercises. Exercise photos are
 -- shrunk in the browser and stored as small data URLs. A journal routine can point
 -- to the workout it plans; deleting the workout keeps the routine, unlinked.

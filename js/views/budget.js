@@ -1,9 +1,9 @@
-import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231455';
-import { icon } from '../icons.js?v=202611231455';
-import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231455';
-import { txnRow } from './home.js?v=202611231455';
-import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231455';
-import * as vault from './vault.js?v=202611231455';
+import { monthSummary, categoriesOf, vaultSummary, monthHistory } from '../store.js?v=202611231525';
+import { icon } from '../icons.js?v=202611231525';
+import { esc, money, moneyShort, todayISO, monthOf, shiftMonth, monthLabel, dayLabel, shortDate, fromISO } from '../ui.js?v=202611231525';
+import { txnRow } from './home.js?v=202611231525';
+import { summaryTile as subscriptionsTile } from './subscriptions.js?v=202611231525';
+import * as vault from './vault.js?v=202611231525';
 
 let month = monthOf(todayISO());
 

@@ -4,9 +4,9 @@ const KEY = 'life.budget.v1';
 function read() {
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && Array.isArray(d.categories) && Array.isArray(d.transactions)) return { vault: {}, vaultEntries: [], subscriptions: [], wishlist: [], places: [], workouts: [], exercises: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {}, ...d };
+    if (d && Array.isArray(d.categories) && Array.isArray(d.transactions)) return { vault: {}, vaultEntries: [], subscriptions: [], wishlist: [], workouts: [], exercises: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {}, ...d };
   } catch { /* fall through to empty */ }
-  return { categories: [], transactions: [], vault: {}, vaultEntries: [], subscriptions: [], wishlist: [], places: [], workouts: [], exercises: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {} };
+  return { categories: [], transactions: [], vault: {}, vaultEntries: [], subscriptions: [], wishlist: [], workouts: [], exercises: [], journalItems: [], journalMarks: [], journalDays: [], journalSettings: {} };
 }
 
 function write(d) {
@@ -33,8 +33,6 @@ export function create() {
     async removeWorkout(id) { const d = read(); d.workouts = d.workouts.filter((w) => w.id !== id); d.exercises = d.exercises.filter((e) => e.workoutId !== id); d.journalItems = d.journalItems.map((i) => (i.workoutId === id ? { ...i, workoutId: null } : i)); write(d); },
     async saveExercise(e) { const d = read(); upsert(d.exercises, e); write(d); },
     async removeExercise(id) { const d = read(); d.exercises = d.exercises.filter((e) => e.id !== id); write(d); },
-    async savePlace(p) { const d = read(); upsert(d.places, p); write(d); },
-    async removePlace(id) { const d = read(); d.places = d.places.filter((p) => p.id !== id); write(d); },
     async saveWish(w) { const d = read(); upsert(d.wishlist, w); write(d); },
     async removeWish(id) { const d = read(); d.wishlist = d.wishlist.filter((w) => w.id !== id); write(d); },
     async saveJournalItem(i) { const d = read(); upsert(d.journalItems, i); write(d); },

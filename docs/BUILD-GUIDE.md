@@ -1,6 +1,6 @@
 # Life: build guide for a Claude agent
 
-This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a wishlist, a journal of routines and check-ins, a mindfulness diary, workouts, a world scratch map, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
+This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a wishlist, a journal of routines and check-ins, a mindfulness diary, workouts, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
 
 Read the whole guide before starting. Steps marked **(person)** need the person themself: creating accounts, choosing passwords and signing in. Never type a password for them and never ask them to paste one to you.
 
@@ -22,7 +22,6 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
   - Week view with each day's load and energy, and a Routines page with starter ideas.
   - Diary: one entry per day. Tracker cards (water, steps, sleep, movement, time outside, home-cooked meals) with editable daily goals, a meter, plus and minus buttons and a 7-day average; a question of the day; three things to be grateful for; what drained and what gave energy; the one thing that matters tomorrow; three more questions behind "More questions"; and free writing. It saves while typing (shown as "Saving…" then "Saved") without redrawing the page, and lists earlier entries.
 - **Workouts**: workouts with a name, how long they take, a colour and a note, each with exercises (an optional photo, shrunk to 480 px in the browser and stored as a small data URL; sets with reps or seconds; a body area; a note). **Add to my week** creates or updates a Journal routine linked to the workout (days, part of day, its minutes); the Journal's item card then offers Open workout. **Start workout** lists the exercises with a tick per set; **Finish** ticks today's planned routine done and adds the minutes to the diary's Movement, with Undo. Reached from Home, the desktop sidebar and the Journal's Routines page.
-- **World map**, a scratch map: countries start covered in foil; tapping one opens a card to mark it Been there (it is scratched off and shows its continent's colour, with an optional year and memory), Want to go (dotted outline) or Not yet, with Undo. Stats for countries visited out of 195, continents and the want-to-go list; zoom buttons, drag and pinch; search by name for small countries; lists grouped by continent. Reached from its Home tile and the desktop sidebar.
 - **Recipes**: recipe list with search and category filters, recipe pages with a servings stepper that rescales ingredients, macros per serving and Ninja Speedi settings, and a weekly meal plan with daily macro totals and a tickable shopping list.
 - **Settings**: where the data lives, sign out, and a JSON backup download.
 
@@ -36,24 +35,23 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
 ```
 index.html               app shell (nav, main view, sheet dialog, toast)
 css/styles.css           all styles: design tokens, bento tiles, sheets, charts
-js/app.js                router (#/home, #/budget, #/subscriptions, #/wishlist, #/journal, #/workouts, #/world, #/recipes, #/plan, #/settings) and click actions
+js/app.js                router (#/home, #/budget, #/subscriptions, #/wishlist, #/journal, #/workouts, #/recipes, #/plan, #/settings) and click actions
 js/store.js              all data and calculations; screens read `state` and call its functions
 js/adapters/supabase.js  database reads and writes
 js/adapters/local.js     same interface, saved in the browser only
 js/config.js             Supabase URL and publishable key, recipe data location
-js/views/*.js            one file per screen (home, budget, vault, subscriptions, wishlist, journal, diary, workouts, world, sheets, recipes, settings)
+js/views/*.js            one file per screen (home, budget, vault, subscriptions, wishlist, journal, diary, workouts, sheets, recipes, settings)
 js/icons.js              UI icons, generated from Lucide (ISC licence)
 js/brands.js             service logos, generated from Simple Icons (CC0)
 data/recipes.json        recipes and categories
 data/plans.json          meal plan: daily targets, foods table, weeks with a shopping list
-data/world.json          world map: country outlines already drawn as SVG paths, names and continents (tools/make-world-map.mjs rebuilds it)
 images/                  recipe photos stored with the app
 supabase/schema.sql      every database table and security rule, run once
 serve.js                 local preview server: node serve.js  ->  http://localhost:4174
 tools/bump-version.js    run before publishing any change (see section 5)
 ```
 
-**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `wishlist_items`, `places` (one row per country, visited or want to go), `workouts`, `workout_exercises`, `journal_items` (with an optional `workout_id`), `journal_marks` (done or skipped per day), `journal_days` (check-in, diary trackers and answers, one row per date) and `journal_settings` (comfortable minutes per day and diary goals). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
+**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `wishlist_items`, `workouts`, `workout_exercises`, `journal_items` (with an optional `workout_id`), `journal_marks` (done or skipped per day), `journal_days` (check-in, diary trackers and answers, one row per date) and `journal_settings` (comfortable minutes per day and diary goals). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
 
 **Design system**: cream background, pastel tiles (butter, pink, sage, sky, lavender, peach) with dark text in both light and dark mode, black pill buttons, a dark bottom bar on phones with a pink plus button, and a sidebar on desktop. On phones the bar holds Home, Budget, the plus button, Journal and Recipes; Settings is the gear on Home. The plus button adds a transaction, or a journal item while in Journal. Fonts: Instrument Serif for headings, Plus Jakarta Sans for text. Built to Apple's Human Interface Guidelines translated to the web: visible labels and inline errors on every field, Undo instead of confirmation dialogs for reversible actions, every chart with a title, period, one-sentence takeaway and a table view, targets of 44 px on touch, and colour never the only signal.
 
@@ -124,8 +122,7 @@ The original was built in one long session, one module at a time, each tested in
 9. **Wishlist**, with a link to each item and a "Bought it" step that can log the expense.
 10. **Diary**, a mindfulness journal with daily trackers and guided questions, saved while typing.
 11. **Bills**, added to the subscriptions page with varying amounts and payments every few months.
-12. **World map**, a scratch map of countries visited and wanted.
-13. **Workouts**, with exercises and photos, planned into the Journal week, and a start-workout view that feeds the diary.
+12. **Workouts**, with exercises and photos, planned into the Journal week, and a start-workout view that feeds the diary.
 
 Planned but not built yet: phone notifications for the saving reminder (needs a service worker and a scheduled job).
 

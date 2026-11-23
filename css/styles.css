@@ -823,48 +823,6 @@ button.tile-checkin { text-align: left; }
 .history-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
 .history-list small { color: var(--ink-2); margin-left: 6px; }
 
-/* ---------- World map ---------- */
-
-@media (max-width: 899px) { .nav-world { display: none; } }
-
-.map-panel { gap: 10px; }
-.map-zoom { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 8%, transparent); }
-.map-zoom .icon-btn { font-size: 22px; font-weight: 700; }
-.map-wrap { border-radius: var(--r-md); overflow: hidden; background: color-mix(in srgb, var(--sky) 35%, var(--surface)); }
-.world { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 520; touch-action: none; cursor: grab; user-select: none; }
-.world:active { cursor: grabbing; }
-
-.foil-base { fill: #CFC8BB; }
-.foil-line { fill: #E4DED3; }
-@media (prefers-color-scheme: dark) { .foil-base { fill: #57534C; } .foil-line { fill: #6B665E; } }
-
-.land { fill: url(#foil); stroke: var(--surface); stroke-width: 0.35; vector-effect: non-scaling-stroke; transition: fill 0.6s ease; cursor: pointer; }
-.land:hover { filter: brightness(1.08); }
-.land.is-want { stroke: var(--ink); stroke-width: 1.1; stroke-dasharray: 2.5 2; }
-.land.is-visited.tone-pink { fill: var(--pink); }
-.land.is-visited.tone-butter { fill: var(--butter); }
-.land.is-visited.tone-peach { fill: var(--peach); }
-.land.is-visited.tone-sky { fill: var(--sky); }
-.land.is-visited.tone-sage { fill: var(--sage); }
-.land.is-visited.tone-lavender { fill: var(--lavender); }
-.land.is-visited { stroke: rgba(27, 26, 23, 0.35); }
-.land.just-scratched { animation: scratch 1.1s ease-out; }
-@keyframes scratch {
-  0% { fill: url(#foil); filter: brightness(1.4) drop-shadow(0 0 0 transparent); }
-  40% { filter: brightness(1.25) drop-shadow(0 0 6px rgba(255, 220, 120, 0.9)); }
-  100% { filter: none; }
-}
-
-.legend .swatch-foil, .legend .swatch-visited, .legend .swatch-want { display: inline-block; width: 14px; height: 14px; border-radius: 4px; }
-.swatch-foil { background: repeating-linear-gradient(45deg, #CFC8BB 0 4px, #E4DED3 4px 6px); }
-.swatch-visited { background: var(--pink); border: 1px solid rgba(27, 26, 23, 0.35); }
-.swatch-want { background: repeating-linear-gradient(45deg, #CFC8BB 0 4px, #E4DED3 4px 6px); border: 1.5px dashed var(--ink); }
-.legend { flex-wrap: wrap; }
-
-.bubble { font-size: 12px; font-weight: 700; }
-
-@media (prefers-reduced-motion: reduce) { .land { transition: none; } .land.just-scratched { animation: none; } }
-
 /* ---------- Workouts ---------- */
 
 @media (max-width: 899px) { .nav-workouts { display: none; } }

@@ -25,9 +25,6 @@ const rowToDay = (r) => ({ id: r.date, date: r.date, energy: r.energy || 0, mood
 const wishToRow = (w) => ({ id: w.id, name: w.name, url: w.url, price_cents: w.price || null, priority: w.priority, note: w.note, bought_on: w.boughtOn || null, transaction_id: w.transactionId || null, created_at: w.createdAt });
 const rowToWish = (r) => ({ id: r.id, name: r.name, url: r.url || '', price: r.price_cents || 0, priority: r.priority, note: r.note || '', boughtOn: r.bought_on || '', transactionId: r.transaction_id || '', createdAt: r.created_at });
 
-const placeToRow = (p) => ({ id: p.id, country: p.country, status: p.status, year: p.year || '', note: p.note || '', created_at: p.createdAt });
-const rowToPlace = (r) => ({ id: r.id, country: r.country, status: r.status, year: r.year || '', note: r.note || '', createdAt: r.created_at });
-
 export async function create(url, key) {
   const sb = createClient(url, key);
 
@@ -65,13 +62,12 @@ export async function create(url, key) {
         all('subscriptions', 'created_at'),
       ]);
       // journal_days has no id column, so it is read on its own (one row per day, a few hundred a year).
-      const [items, marks, days, js, wishes, places, workouts, exercises] = await Promise.all([
+      const [items, marks, days, js, wishes, workouts, exercises] = await Promise.all([
         all('journal_items', 'created_at'),
         all('journal_marks', 'date'),
         sb.from('journal_days').select('*').order('date').limit(5000),
         sb.from('journal_settings').select('*').maybeSingle(),
         all('wishlist_items', 'created_at'),
-        all('places', 'created_at'),
         all('workouts', 'sort'),
         all('workout_exercises', 'sort'),
       ]);
@@ -86,7 +82,6 @@ export async function create(url, key) {
         vaultEntries: entries.map(rowToEntry),
         subscriptions: subs.map(rowToSub),
         wishlist: wishes.map(rowToWish),
-        places: places.map(rowToPlace),
         workouts: workouts.map(rowToWorkout),
         exercises: exercises.map(rowToExercise),
         journalItems: items.map(rowToItem),
@@ -109,8 +104,6 @@ export async function create(url, key) {
     async removeWorkout(id) { check(await sb.from('workouts').delete().eq('id', id)); },
     async saveExercise(e) { check(await sb.from('workout_exercises').upsert(exerciseToRow(e))); },
     async removeExercise(id) { check(await sb.from('workout_exercises').delete().eq('id', id)); },
-    async savePlace(p) { check(await sb.from('places').upsert(placeToRow(p))); },
-    async removePlace(id) { check(await sb.from('places').delete().eq('id', id)); },
     async saveWish(w) { check(await sb.from('wishlist_items').upsert(wishToRow(w))); },
     async removeWish(id) { check(await sb.from('wishlist_items').delete().eq('id', id)); },
     async saveJournalItem(i) { check(await sb.from('journal_items').upsert(itemToRow(i))); },

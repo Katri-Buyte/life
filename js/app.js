@@ -1,17 +1,16 @@
-import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231455';
-import { icon } from './icons.js?v=202611231455';
-import { closeSheet, toast, todayISO } from './ui.js?v=202611231455';
-import * as home from './views/home.js?v=202611231455';
-import * as budget from './views/budget.js?v=202611231455';
-import * as settings from './views/settings.js?v=202611231455';
-import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231455';
-import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231455';
-import * as workouts from './views/workouts.js?v=202611231455';
-import * as world from './views/world.js?v=202611231455';
-import * as wishlist from './views/wishlist.js?v=202611231455';
-import * as journal from './views/journal.js?v=202611231455';
-import * as subscriptions from './views/subscriptions.js?v=202611231455';
-import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231455';
+import { state, init, subscribe, signIn, signOut } from './store.js?v=202611231525';
+import { icon } from './icons.js?v=202611231525';
+import { closeSheet, toast, todayISO } from './ui.js?v=202611231525';
+import * as home from './views/home.js?v=202611231525';
+import * as budget from './views/budget.js?v=202611231525';
+import * as settings from './views/settings.js?v=202611231525';
+import { openTransactionSheet, openCategorySheet } from './views/sheets.js?v=202611231525';
+import { openVaultEntrySheet, openVaultSettingsSheet } from './views/vault.js?v=202611231525';
+import * as workouts from './views/workouts.js?v=202611231525';
+import * as wishlist from './views/wishlist.js?v=202611231525';
+import * as journal from './views/journal.js?v=202611231525';
+import * as subscriptions from './views/subscriptions.js?v=202611231525';
+import { recipesView, planView, onLoaded as onRecipesLoaded, retry as retryRecipes } from './views/recipes.js?v=202611231525';
 
 const routes = {
   home: { title: 'Home', view: home },
@@ -19,7 +18,6 @@ const routes = {
   subscriptions: { title: 'Bills & subscriptions', view: subscriptions, nav: 'budget' },
   journal: { title: 'Journal', view: journal },
   wishlist: { title: 'Wishlist', view: wishlist, nav: 'budget' },
-  world: { title: 'World map', view: world },
   workouts: { title: 'Workouts', view: workouts },
   recipes: { title: 'Recipes', view: recipesView },
   plan: { title: 'Meal plan', view: planView, nav: 'recipes' },
@@ -51,7 +49,6 @@ function renderNav(route) {
     ${link('journal', 'notebook-pen', 'Journal')}
     ${link('recipes', 'chef-hat', 'Recipes')}
     ${link('workouts', 'dumbbell', 'Workouts')}
-    ${link('world', 'earth', 'World map')}
     ${link('settings', 'settings', 'Settings')}`;
 }
 
@@ -101,9 +98,6 @@ const actions = {
   'ex-edit': (el) => workouts.openExerciseSheet(el.dataset.id),
   'go-set': (el) => workouts.toggleSet(el.dataset.ex, el.dataset.i),
   'go-finish': (el) => workouts.finish(el.dataset.id),
-  'world-country': (el) => world.openCountry(el.dataset.c),
-  'world-zoom': (el) => world.zoom(el.dataset.z),
-  'world-retry': () => world.retry(),
   'wish-add': () => wishlist.openWishSheet(),
   'wish-edit': (el) => wishlist.openWishSheet(el.dataset.id),
   'wish-bought': (el) => wishlist.openBoughtSheet(el.dataset.id),
@@ -130,7 +124,7 @@ const actions = {
   'recipes-retry': () => retryRecipes(),
   'sign-out': () => signOut(),
   export: () => {
-    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions, wishlist: state.wishlist, places: state.places, workouts: state.workouts, exercises: state.exercises, journalItems: state.journalItems, journalMarks: state.journalMarks, journalDays: state.journalDays, journalSettings: state.journalSettings }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ exported: new Date().toISOString(), categories: state.categories, transactions: state.transactions, vault: state.vault, vaultEntries: state.vaultEntries, subscriptions: state.subscriptions, wishlist: state.wishlist, workouts: state.workouts, exercises: state.exercises, journalItems: state.journalItems, journalMarks: state.journalMarks, journalDays: state.journalDays, journalSettings: state.journalSettings }, null, 2)], { type: 'application/json' });
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `life-backup-${todayISO()}.json` });
     a.click();
     URL.revokeObjectURL(a.href);
@@ -168,7 +162,6 @@ document.addEventListener('submit', async (e) => {
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); view.focus({ preventScroll: true }); });
 subscribe(render);
 onRecipesLoaded(render);
-world.onLoaded(render);
 
 render();
 init().catch(() => {
