@@ -1,9 +1,10 @@
-import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231434';
-import { icon } from '../icons.js?v=202611231434';
-import { homeTile as wishlistTile } from './wishlist.js?v=202611231434';
-import { homeTile as journalTile } from './journal.js?v=202611231434';
-import { homeTile as vaultTile } from './vault.js?v=202611231434';
-import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231434';
+import { state, monthSummary, categoryById, sum } from '../store.js?v=202611231442';
+import { icon } from '../icons.js?v=202611231442';
+import { homeTile as worldTile } from './world.js?v=202611231442';
+import { homeTile as wishlistTile } from './wishlist.js?v=202611231442';
+import { homeTile as journalTile } from './journal.js?v=202611231442';
+import { homeTile as vaultTile } from './vault.js?v=202611231442';
+import { esc, money, moneyShort, todayISO, monthOf, iso, shortDate, monthLabel } from '../ui.js?v=202611231442';
 
 function greeting() {
   const h = new Date().getHours();
@@ -136,6 +137,6 @@ export function render() {
         <span class="tile-name">Journal</span>
         <span class="tile-line">Routines, check-ins and your week</span>
       </a>
-      ${soonTile('sage', 'earth', 'World map', 'Scratch off where you have been')}
+      ${worldTile()}
     </section>`;
 }

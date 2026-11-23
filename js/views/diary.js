@@ -1,10 +1,10 @@
 // Diary: a daily entry with small trackers and a few gentle questions.
 // It saves while you type, so nothing is lost if the app closes.
-import { state, dayEntry, patchJournalDay, persistJournalDay, saveJournalSettings } from '../store.js?v=202611231434';
-import { icon } from '../icons.js?v=202611231434';
-import { esc, iso, todayISO, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231434';
-import { head, showError } from './sheets.js?v=202611231434';
-import { journalNav, currentDay, ENERGY } from './journal.js?v=202611231434';
+import { state, dayEntry, patchJournalDay, persistJournalDay, saveJournalSettings } from '../store.js?v=202611231442';
+import { icon } from '../icons.js?v=202611231442';
+import { esc, iso, todayISO, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231442';
+import { head, showError } from './sheets.js?v=202611231442';
+import { journalNav, currentDay, ENERGY } from './journal.js?v=202611231442';
 
 export const TRACKERS = [
   { id: 'water', name: 'Water', unit: 'glasses', icon: 'droplet', tone: 'sky', goal: 8, step: 1, max: 30 },
