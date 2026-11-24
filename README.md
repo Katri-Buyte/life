@@ -1,8 +1,8 @@
 # Life
 
-A personal app that keeps budget, savings, subscriptions, a wishlist, a journal of routines and check-ins, a mindfulness diary, workouts, recipes and a weekly meal plan in one place, in a calm pastel bento design. It works on a phone (add it to the home screen) and on a computer.
+A personal app that keeps budget, savings, subscriptions, a wishlist, a shopping list, a journal of routines and check-ins, a mindfulness diary, workouts, recipes and a weekly meal plan in one place, in a calm pastel bento design. It works on a phone (add it to the home screen) and on a computer.
 
-Your budget, savings, subscriptions, wishlist, journal, diary and workouts are saved in your own private database behind your login. The code, recipes and meal plan in this repo are public.
+Your budget, savings, subscriptions, wishlist, shopping list, journal, diary and workouts are saved in your own private database behind your login. The code, recipes and meal plan in this repo are public.
 
 ## Make your own copy
 

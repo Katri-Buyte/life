@@ -1,6 +1,6 @@
 # Life: build guide for a Claude agent
 
-This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a wishlist, a journal of routines and check-ins, a mindfulness diary, workouts, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
+This guide is for a Claude agent setting up its own person's copy of **Life**, a personal app that keeps budget, savings, subscriptions, a wishlist, a shopping list, a journal of routines and check-ins, a mindfulness diary, workouts, recipes and a meal plan in one place. The code in this repo is complete and working; your job is to give your person their own copy with their own private database, their own hosting and their own content.
 
 Read the whole guide before starting. Steps marked **(person)** need the person themself: creating accounts, choosing passwords and signing in. Never type a password for them and never ask them to paste one to you.
 
@@ -13,6 +13,7 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
   - Vault: savings total, "Add money" and "Take out", a monthly saving goal suggested from the salary (10, 15 or 20%, with 20% from the 50/30/20 rule of thumb), and an in-app reminder until the goal is met.
   - Spending by day chart (with "View as table"), category cards with optional monthly limits, the transaction list, and a Monthly history (chart plus table of income, spent, saved and left per month).
   - Bills & subs page (the subscriptions table, with a kind of bill or subscription): name, amount, how often (every month, every 2, 3, 4 or 6 months, or every year), payment day, category. A bill can be marked "The amount changes each time"; its amount is then an estimate and Log asks for the real amount, starting from what was paid last time. A bill can also be "I add it each time" (cycle manual) for utilities with no fixed date or amount: it has an Add button that saves the bill as an expense, shows this month's bill on its row and its recent payments in its form, and its usual amount (average of the last three) and monthly cost (averaged over up to 12 months) come from that history. The page shows the monthly total split into bills and subscriptions and what is still to pay this month. When a payment date passes it shows as Due with **Log** (adds the expense on its date) and **Skip**, both with Undo. An expense that month whose note contains the name as whole words counts as already paid. Known services show their logo.
+  - Shopping list page (#/shopping, Home tile, phone bar, sidebar): items the person adds themselves, sorted into Fruit & veg, Fridge, Pantry, Household or Other, saved in the database so phone and computer match; tick, remove, Clear ticked, all with Undo. Below it, this week's meal plan list from data/plans.json, whose ticks stay on each device. The Meal plan page links here instead of showing the list itself.
   - Wishlist page: name, a link to the product (a pasted address without https:// is completed; anything that is not a web address is refused), optional price, priority Need, Want or Someday, and a note. Totals sit next to the vault balance with how many priced items it could cover. **Bought it** moves an item to a Bought list and can add the purchase to expenses in the same step, with Undo.
   - Totals are per calendar month, so they start from zero on the 1st; the vault total carries over.
 - **Journal**, for staying on track without feeling overwhelmed
@@ -35,12 +36,12 @@ Read the whole guide before starting. Steps marked **(person)** need the person 
 ```
 index.html               app shell (nav, main view, sheet dialog, toast)
 css/styles.css           all styles: design tokens, bento tiles, sheets, charts
-js/app.js                router (#/home, #/budget, #/subscriptions, #/wishlist, #/journal, #/workouts, #/recipes, #/plan, #/settings) and click actions
+js/app.js                router (#/home, #/budget, #/subscriptions, #/wishlist, #/shopping, #/journal, #/workouts, #/recipes, #/plan, #/settings) and click actions
 js/store.js              all data and calculations; screens read `state` and call its functions
 js/adapters/supabase.js  database reads and writes
 js/adapters/local.js     same interface, saved in the browser only
 js/config.js             Supabase URL and publishable key, recipe data location
-js/views/*.js            one file per screen (home, budget, vault, subscriptions, wishlist, journal, diary, workouts, sheets, recipes, settings)
+js/views/*.js            one file per screen (home, budget, vault, subscriptions, wishlist, shopping, journal, diary, workouts, sheets, recipes, settings)
 js/icons.js              UI icons, generated from Lucide (ISC licence)
 js/brands.js             service logos, generated from Simple Icons (CC0)
 data/recipes.json        recipes and categories
@@ -52,7 +53,7 @@ serve.js                 local preview server: node serve.js  ->  http://localho
 tools/bump-version.js    run before publishing any change (see section 5)
 ```
 
-**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `wishlist_items`, `workouts`, `workout_exercises`, `journal_items` (with an optional `workout_id`), `journal_marks` (done or skipped per day), `journal_days` (check-in, diary trackers and answers, one row per date) and `journal_settings` (comfortable minutes per day and diary goals). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
+**Database tables** (all in `supabase/schema.sql`): `budget_categories`, `budget_transactions`, `vault_settings`, `vault_entries`, `subscriptions`, `wishlist_items`, `shopping_items`, `workouts`, `workout_exercises`, `journal_items` (with an optional `workout_id`), `journal_marks` (done or skipped per day), `journal_days` (check-in, diary trackers and answers, one row per date) and `journal_settings` (comfortable minutes per day and diary goals). Every row has a `user_id` that defaults to the signed-in user, and a row level security policy so each user can only see and change their own rows. Amounts are stored as whole cents.
 
 **Design system**: cream background, pastel tiles (butter, pink, sage, sky, lavender, peach) with dark text in both light and dark mode, black pill buttons, a dark bottom bar on phones with a pink plus button, and a sidebar on desktop. On phones the bar holds Home, Budget, the plus button, Journal and Recipes; Settings is the gear on Home. The plus button adds a transaction, or a journal item while in Journal. Fonts: Instrument Serif for headings, Plus Jakarta Sans for text. Built to Apple's Human Interface Guidelines translated to the web: visible labels and inline errors on every field, Undo instead of confirmation dialogs for reversible actions, every chart with a title, period, one-sentence takeaway and a table view, targets of 44 px on touch, and colour never the only signal.
 
@@ -124,6 +125,7 @@ The original was built in one long session, one module at a time, each tested in
 10. **Diary**, a mindfulness journal with daily trackers and guided questions, saved while typing.
 11. **Bills**, added to the subscriptions page with varying amounts and payments every few months.
 12. **Workouts**, with exercises and photos, planned into the Journal week, and a start-workout view that feeds the diary.
+13. **Shopping list** as its own page, so it is not hidden inside the meal plan, with the person's own items next to the meal plan list.
 
 Planned but not built yet: phone notifications for the saving reminder (needs a service worker and a scheduled job).
 
