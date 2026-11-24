@@ -1,8 +1,8 @@
 // The vault: savings inside the Budget section.
-import { state, newId, vaultSummary, vaultBalance, categoriesOf, saveVaultSettings, saveVaultEntry, removeVaultEntry } from '../store.js?v=202611231608';
-import { icon } from '../icons.js?v=202611231608';
-import { esc, money, moneyShort, parseAmount, amountInput, todayISO, monthOf, monthLabel, shortDate, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611231608';
-import { head, showError } from './sheets.js?v=202611231608';
+import { state, newId, vaultSummary, vaultBalance, categoriesOf, saveVaultSettings, saveVaultEntry, removeVaultEntry } from '../store.js?v=202611241533';
+import { icon } from '../icons.js?v=202611241533';
+import { esc, money, moneyShort, parseAmount, amountInput, todayISO, monthOf, monthLabel, shortDate, fromISO, openSheet, closeSheet, toast, saveFailed } from '../ui.js?v=202611241533';
+import { head, showError } from './sheets.js?v=202611241533';
 
 // Share of the salary offered as a monthly saving goal. 20% is the saving part
 // of the common 50/30/20 budgeting rule of thumb; 10% and 15% are gentler starts.

@@ -1,9 +1,9 @@
 // Recipes and meal plan. All content lives in data/recipes.json and
 // data/plans.json, with photos in images/ (see RECIPES_BASE in config.js).
-import { RECIPES_BASE } from '../config.js?v=202611231608';
-import { TONES } from '../store.js?v=202611231608';
-import { icon } from '../icons.js?v=202611231608';
-import { esc, todayISO, iso, fromISO } from '../ui.js?v=202611231608';
+import { RECIPES_BASE } from '../config.js?v=202611241533';
+import { TONES } from '../store.js?v=202611241533';
+import { icon } from '../icons.js?v=202611241533';
+import { esc, todayISO, iso, fromISO } from '../ui.js?v=202611241533';
 
 let DATA = { categories: [], recipes: [] };
 let PLANS = { weeks: [] };
@@ -393,26 +393,30 @@ function pickWeek(start) {
 const shopKey = (week) => `life.shop.${week.start}`;
 const loadTicks = (week) => { try { return JSON.parse(localStorage.getItem(shopKey(week)) || '{}'); } catch { return {}; } };
 
+// For the Shopping page: this week's list and its ticks.
+export function planShopping() {
+  load();
+  if (status !== 'ready') return { status, week: null, ticks: {} };
+  const { week } = pickWeek();
+  return { status, week, ticks: week ? loadTicks(week) : {} };
+}
+export function savePlanTicks(ticks) {
+  const { week } = pickWeek();
+  if (!week) return;
+  try { localStorage.setItem(shopKey(week), JSON.stringify(ticks)); } catch { /* storage unavailable */ }
+}
+
 function shoppingHtml(week) {
   const list = week.shopping || [];
   if (!list.length) return '';
-  const ticks = loadTicks(week);
   const total = list.reduce((s, sec) => s + sec.items.length, 0);
-  const done = Object.values(ticks).filter(Boolean).length;
+  const done = Object.values(loadTicks(week)).filter(Boolean).length;
   return `
-    <details class="panel shopping" id="shopping">
-      <summary><span class="shopping-title">${icon('shopping-basket', 20)} Shopping list</span><span class="pill pill-plain" id="shop-count">${done} of ${total} ticked</span></summary>
-      <div class="shopping-body">
-        ${list.map((sec, si) => `
-          <section>
-            <h3>${esc(sec.section)}</h3>
-            <ul class="ticks-list">
-              ${sec.items.map((it, ii) => `<li><label><input type="checkbox" data-shop="${si}-${ii}" ${ticks[`${si}-${ii}`] ? 'checked' : ''}><span><b>${esc(it.name)}</b>${it.qty ? ` ${esc(it.qty)}` : ''}${it.note ? `<small>${esc(it.note)}</small>` : ''}</span></label></li>`).join('')}
-            </ul>
-          </section>`).join('')}
-      </div>
-      <button type="button" class="btn btn-quiet" id="shop-reset">Clear ticks</button>
-    </details>`;
+    <a class="panel shopping-link" href="#/shopping">
+      <span class="shopping-title">${icon('shopping-basket', 20)} Shopping list</span>
+      <span class="pill pill-plain">${done} of ${total} ticked</span>
+      ${icon('chevron-right', 20)}
+    </a>`;
 }
 
 function renderPlan(start) {
@@ -470,21 +474,6 @@ function mountPlan(root, start) {
     document.getElementById(e.currentTarget.dataset.scroll)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   });
 
-  const box = root.querySelector('#shopping');
-  const { week } = pickWeek(start);
-  if (!box || !week) return;
-  const total = box.querySelectorAll('[data-shop]').length;
-  const update = () => {
-    const ticks = {};
-    box.querySelectorAll('[data-shop]').forEach((c) => { if (c.checked) ticks[c.dataset.shop] = true; });
-    try { localStorage.setItem(shopKey(week), JSON.stringify(ticks)); } catch { /* storage unavailable */ }
-    box.querySelector('#shop-count').textContent = `${Object.keys(ticks).length} of ${total} ticked`;
-  };
-  box.addEventListener('change', (e) => { if (e.target.matches('[data-shop]')) update(); });
-  box.querySelector('#shop-reset').addEventListener('click', () => {
-    box.querySelectorAll('[data-shop]').forEach((c) => { c.checked = false; });
-    update();
-  });
 }
 
 export const planView = {

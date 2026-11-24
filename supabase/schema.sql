@@ -257,3 +257,23 @@ create policy "own workout exercises" on public.workout_exercises for all to aut
 
 grant select, insert, update, delete on public.workouts, public.workout_exercises to authenticated;
 revoke all on public.workouts, public.workout_exercises from anon;
+
+-- Shopping list (added 2026-11-24): your own items. The meal plan's list comes
+-- from data/plans.json; its ticks stay on each device.
+
+create table if not exists public.shopping_items (
+  id uuid primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  name text not null,
+  section text not null default 'other' check (section in ('produce', 'fridge', 'pantry', 'home', 'other')),
+  done boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.shopping_items enable row level security;
+
+drop policy if exists "own shopping" on public.shopping_items;
+create policy "own shopping" on public.shopping_items for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+grant select, insert, update, delete on public.shopping_items to authenticated;
+revoke all on public.shopping_items from anon;

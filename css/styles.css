@@ -874,3 +874,18 @@ button.tile-checkin { text-align: left; }
 input[type='date'].input { -webkit-appearance: none; appearance: none; display: block; min-width: 0; width: 100%; line-height: 46px; padding-top: 0; padding-bottom: 0; }
 input[type='date'].input::-webkit-date-and-time-value { text-align: left; margin: 0; }
 input[type='date'].input::-webkit-calendar-picker-indicator { margin-left: auto; }
+
+/* Shopping list page */
+.shop-add { display: grid; gap: 12px; }
+.shop-add-label { font-weight: 700; }
+.shop-add-row { display: flex; gap: 8px; }
+.shop-add-row .input { flex: 1; min-width: 0; }
+.shop-add-row .btn { flex: none; }
+.shop-add .field { margin: 0; border: 0; padding: 0; min-width: 0; }
+.shop-item { display: flex; align-items: center; gap: 4px; }
+.shop-item label { flex: 1; min-width: 0; }
+.shop-item .icon-btn { flex: none; color: var(--ink-2); }
+#own-panel .shopping-body, #h-plan ~ .shopping-body { margin-bottom: 8px; }
+.shopping-link { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.shopping-link .shopping-title { flex: 1; }
+.panel > h2.shopping-title { margin-bottom: 4px; }

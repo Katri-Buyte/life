@@ -1,6 +1,6 @@
 // One place for all data. Screens read `state` and call the functions below;
 // where the data is kept (this device or the database) is the adapter's job.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611231608';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=202611241533';
 
 export const state = {
   ready: false,
@@ -16,6 +16,7 @@ export const state = {
   journalSettings: { capacity: 120, goals: {} }, // capacity: minutes that feel like a comfortable day; goals: daily tracker goals
   workouts: [],       // { id, name, minutes, tone, note, sort, createdAt }
   exercises: [],      // { id, workoutId, name, image (small data URL or ''), area, sets, reps, seconds, note, sort }
+  shopping: [],       // { id, name, section 'produce'|'fridge'|'pantry'|'home'|'other', done, createdAt }
   wishlist: [],       // { id, name, url, price (cents or 0), priority 'need'|'want'|'someday', note, boughtOn 'YYYY-MM-DD' or '', transactionId, createdAt }
   subscriptions: [],  // { id, kind 'subscription'|'bill', name, amount (cents; an estimate when variable), variable, cycle 'monthly'|'yearly', every (months, for monthly), day 1-31, month 1-12, categoryId, handled 'YYYY-MM', createdAt }
 };
@@ -47,12 +48,12 @@ export const newId = () => crypto.randomUUID();
 export async function init() {
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     state.mode = 'cloud';
-    const { create } = await import('./adapters/supabase.js?v=202611231608');
+    const { create } = await import('./adapters/supabase.js?v=202611241533');
     adapter = await create(SUPABASE_URL, SUPABASE_ANON_KEY);
     state.user = await adapter.user();
     if (!state.user) { state.ready = true; emit(); return; }
   } else {
-    const { create } = await import('./adapters/local.js?v=202611231608');
+    const { create } = await import('./adapters/local.js?v=202611241533');
     adapter = create();
   }
   await reload();
@@ -66,6 +67,7 @@ async function reload() {
   state.vaultEntries = data.vaultEntries || [];
   state.subscriptions = data.subscriptions || [];
   state.wishlist = data.wishlist || [];
+  state.shopping = data.shopping || [];
   state.workouts = data.workouts || [];
   state.exercises = data.exercises || [];
   state.journalItems = data.journalItems || [];
@@ -94,6 +96,7 @@ export async function signOut() {
   state.vaultEntries = [];
   state.subscriptions = [];
   state.wishlist = [];
+  state.shopping = [];
   state.workouts = [];
   state.exercises = [];
   state.journalItems = [];
@@ -170,6 +173,13 @@ export function removeExercise(id) {
 export function saveWish(w) {
   return commit(() => { state.wishlist = withItem(state.wishlist, w); }, () => adapter.saveWish(w));
 }
+export function saveShoppingItem(i) {
+  return commit(() => { state.shopping = withItem(state.shopping, i); }, () => adapter.saveShoppingItem(i));
+}
+export function removeShoppingItem(id) {
+  return commit(() => { state.shopping = state.shopping.filter((i) => i.id !== id); }, () => adapter.removeShoppingItem(id));
+}
+
 export function removeWish(id) {
   return commit(() => { state.wishlist = state.wishlist.filter((w) => w.id !== id); }, () => adapter.removeWish(id));
 }
